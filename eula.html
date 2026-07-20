@@ -1,0 +1,178 @@
+<style>
+  :root {
+    --ground: #FBFBFC;
+    --surface: #FFFFFF;
+    --ink: #1B2330;
+    --muted: #5B6573;
+    --hairline: #E5E8EC;
+    --accent: #26456B;
+    --accent-soft: #E8EEF6;
+    --serif: Georgia, "Iowan Old Style", Palatino, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #14171D; --surface: #1B1F27; --ink: #EAEDF2; --muted: #98A2B3;
+      --hairline: #2A2F39; --accent: #7FA6D9; --accent-soft: #1F2A3A;
+    }
+  }
+  :root[data-theme="light"] {
+    --ground: #FBFBFC; --surface: #FFFFFF; --ink: #1B2330; --muted: #5B6573;
+    --hairline: #E5E8EC; --accent: #26456B; --accent-soft: #E8EEF6;
+  }
+  :root[data-theme="dark"] {
+    --ground: #14171D; --surface: #1B1F27; --ink: #EAEDF2; --muted: #98A2B3;
+    --hairline: #2A2F39; --accent: #7FA6D9; --accent-soft: #1F2A3A;
+  }
+
+  * { box-sizing: border-box; }
+  .doc {
+    background: var(--ground); color: var(--ink); font-family: var(--sans);
+    line-height: 1.65; font-size: 17px;
+    padding: clamp(2rem, 5vw, 5rem) 1.25rem 4rem;
+    display: flex; justify-content: center;
+  }
+  .col { width: 100%; max-width: 720px; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 0.75rem;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600;
+    font-size: clamp(2rem, 5vw, 2.9rem); line-height: 1.1;
+    letter-spacing: -0.01em; text-wrap: balance; margin: 0 0 1rem;
+  }
+  .meta {
+    font-family: var(--mono); font-size: 0.8rem; color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem;
+    padding-bottom: 1.75rem; margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .lede { font-size: 1.15rem; color: var(--muted); margin: 0 0 2.75rem; }
+
+  section { margin-bottom: 2.5rem; }
+  h2 {
+    font-family: var(--serif); font-weight: 600; font-size: 1.35rem;
+    letter-spacing: -0.005em; margin: 0 0 0.85rem;
+    display: flex; gap: 0.7rem; align-items: baseline;
+  }
+  h2 .num {
+    font-family: var(--mono); font-size: 0.8rem; color: var(--accent);
+    flex: none; padding-top: 0.15rem;
+  }
+  p { margin: 0 0 1rem; }
+  ul { margin: 0 0 1rem; padding-left: 1.1rem; }
+  li { margin-bottom: 0.5rem; }
+  strong { color: var(--ink); font-weight: 600; }
+  a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .legal { font-size: 0.95rem; }
+
+  .callout {
+    background: var(--accent-soft); border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0; padding: 1rem 1.15rem; margin: 0 0 1rem;
+    font-size: 0.97rem;
+  }
+  footer {
+    margin-top: 3.5rem; padding-top: 1.75rem;
+    border-top: 1px solid var(--hairline); color: var(--muted); font-size: 0.9rem;
+  }
+  footer a { color: var(--accent); }
+</style>
+
+<div class="doc">
+  <div class="col">
+    <p class="eyebrow">End-User License Agreement</p>
+    <h1>QuickBooks Online Integration — End-User License Agreement</h1>
+    <div class="meta">
+      <span>Operator: HW (hwexec.com)</span>
+      <span>Effective: July 20, 2026</span>
+      <span>Version 1.0</span>
+    </div>
+
+    <p class="lede">This Agreement governs your use of the QuickBooks Online
+      integration operated by HW (the "Software"). By connecting or using the
+      Software, you agree to these terms.</p>
+
+    <section>
+      <h2><span class="num">01</span> License grant</h2>
+      <p>Subject to this Agreement, HW grants you a limited, non-exclusive,
+        non-transferable, revocable license to use the Software to connect your
+        own QuickBooks Online company for your internal business purposes.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">02</span> Permitted use</h2>
+      <p>You may use the Software only with QuickBooks Online companies you own
+        or are authorized to access, and only in compliance with Intuit's
+        applicable terms and all relevant laws.</p>
+      <div class="callout">The Software is an independent integration built on
+        Intuit's public developer API. It is <strong>not created, endorsed, or
+        affiliated with Intuit Inc.</strong> "QuickBooks" and "QuickBooks Online"
+        are trademarks of Intuit Inc.</div>
+    </section>
+
+    <section>
+      <h2><span class="num">03</span> Restrictions</h2>
+      <p>You may not:</p>
+      <ul>
+        <li>Use the Software to access data you are not authorized to access;</li>
+        <li>Resell, sublicense, or provide the Software as a service to third parties;</li>
+        <li>Reverse engineer the Software except to the extent permitted by law;</li>
+        <li>Use the Software to violate Intuit's terms or any applicable law.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2><span class="num">04</span> Your data and responsibilities</h2>
+      <p>You are responsible for the accounting actions you direct the Software to
+        perform, including any records it creates, updates, voids, or deletes in
+        your QuickBooks Online company. Handling of data accessed by the Software
+        is described in our <a href="#">Privacy Policy</a>. You are responsible for
+        maintaining the security of the device on which the Software runs.</p>
+    </section>
+
+    <section class="legal">
+      <h2><span class="num">05</span> No warranty</h2>
+      <p>THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTIES
+        OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+        IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+        AND NON-INFRINGEMENT. HW DOES NOT WARRANT THAT THE SOFTWARE WILL BE
+        ERROR-FREE OR UNINTERRUPTED.</p>
+    </section>
+
+    <section class="legal">
+      <h2><span class="num">06</span> Limitation of liability</h2>
+      <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, HW WILL NOT BE LIABLE FOR ANY
+        INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY
+        LOSS OF DATA, PROFITS, OR REVENUE, ARISING OUT OF OR RELATED TO YOUR USE
+        OF THE SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">07</span> Termination</h2>
+      <p>This license terminates automatically if you breach it, and you may
+        terminate it at any time by disconnecting the Software from QuickBooks
+        Online and ceasing use. Sections 5, 6, and 8 survive termination.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">08</span> Governing law</h2>
+      <p>This Agreement is governed by the laws of the State in which HW is
+        established, without regard to conflict-of-law principles.</p>
+    </section>
+
+    <section>
+      <h2><span class="num">09</span> Contact</h2>
+      <p>Questions about this Agreement can be directed to
+        <a href="mailto:je@hwexec.com">je@hwexec.com</a>.</p>
+    </section>
+
+    <footer>
+      HW · hwexec.com · Independent integration built on the Intuit Developer
+      platform. Not affiliated with Intuit Inc.
+    </footer>
+  </div>
+</div>
