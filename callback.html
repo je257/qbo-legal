@@ -1,0 +1,113 @@
+<style>
+  :root {
+    --ground: #FBFBFC; --surface: #FFFFFF; --ink: #1B2330; --muted: #5B6573;
+    --hairline: #E5E8EC; --accent: #26456B; --accent-soft: #E8EEF6; --ok: #1E7A54;
+    --serif: Georgia, "Iowan Old Style", Palatino, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ground:#14171D; --surface:#1B1F27; --ink:#EAEDF2; --muted:#98A2B3;
+      --hairline:#2A2F39; --accent:#7FA6D9; --accent-soft:#1F2A3A; --ok:#4CBE93; }
+  }
+  :root[data-theme="light"] { --ground:#FBFBFC; --surface:#FFFFFF; --ink:#1B2330;
+    --muted:#5B6573; --hairline:#E5E8EC; --accent:#26456B; --accent-soft:#E8EEF6; --ok:#1E7A54; }
+  :root[data-theme="dark"] { --ground:#14171D; --surface:#1B1F27; --ink:#EAEDF2;
+    --muted:#98A2B3; --hairline:#2A2F39; --accent:#7FA6D9; --accent-soft:#1F2A3A; --ok:#4CBE93; }
+
+  * { box-sizing: border-box; }
+  body, .wrap { margin: 0; }
+  .wrap {
+    background: var(--ground); color: var(--ink); font-family: var(--sans);
+    min-height: 100vh; display: flex; justify-content: center; align-items: flex-start;
+    padding: clamp(2rem, 6vw, 5rem) 1.25rem;
+  }
+  .card {
+    width: 100%; max-width: 640px; background: var(--surface);
+    border: 1px solid var(--hairline); border-radius: 12px;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ok); margin: 0 0 0.6rem;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600; font-size: clamp(1.6rem, 4vw, 2.1rem);
+    line-height: 1.15; margin: 0 0 0.75rem; text-wrap: balance;
+  }
+  p { line-height: 1.6; color: var(--muted); margin: 0 0 1.25rem; }
+  p strong { color: var(--ink); }
+  label {
+    display: block; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 0.4rem;
+  }
+  textarea {
+    width: 100%; min-height: 92px; resize: vertical; font-family: var(--mono);
+    font-size: 0.85rem; line-height: 1.5; color: var(--ink); background: var(--ground);
+    border: 1px solid var(--hairline); border-radius: 8px; padding: 0.75rem; margin-bottom: 1rem;
+  }
+  button {
+    font: inherit; font-weight: 600; cursor: pointer; border: none; border-radius: 8px;
+    background: var(--accent); color: #fff; padding: 0.7rem 1.25rem;
+  }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .status { margin-left: 0.75rem; color: var(--ok); font-size: 0.9rem; font-weight: 600; }
+  .fields { margin-top: 1.5rem; font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
+  .fields div { padding: 0.3rem 0; border-top: 1px solid var(--hairline); word-break: break-all; }
+  .warn { color: var(--ink); background: var(--accent-soft); border-radius: 8px;
+    padding: 1rem; font-size: 0.9rem; line-height: 1.55; }
+</style>
+
+<div class="wrap">
+  <div class="card">
+    <p class="eyebrow">QuickBooks Authorization</p>
+    <h1 id="head">Authorization received</h1>
+    <p id="intro"><strong>Almost done.</strong> Copy the value below and paste it into the
+      terminal where <code>qbo-mcp auth</code> is waiting.</p>
+
+    <label for="url">Redirect URL — paste this into the terminal</label>
+    <textarea id="url" readonly></textarea>
+    <button id="copy" type="button">Copy</button>
+    <span class="status" id="status" role="status"></span>
+
+    <div class="fields" id="fields"></div>
+
+    <p class="warn" id="warn" style="display:none;">This page didn't receive an
+      authorization code. Make sure you opened it by completing the QuickBooks sign-in,
+      not directly.</p>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var full = window.location.href;
+    var params = new URLSearchParams(window.location.search);
+    var code = params.get("code");
+    var realmId = params.get("realmId");
+    var ta = document.getElementById("url");
+    var fields = document.getElementById("fields");
+
+    if (code) {
+      ta.value = full;
+      fields.innerHTML =
+        "<div>code: " + code + "</div>" +
+        "<div>realmId: " + (realmId || "(missing)") + "</div>" +
+        "<div>state: " + (params.get("state") || "") + "</div>";
+    } else {
+      document.getElementById("head").textContent = "No authorization code found";
+      document.getElementById("intro").style.display = "none";
+      ta.style.display = "none";
+      document.getElementById("copy").style.display = "none";
+      document.getElementById("warn").style.display = "block";
+    }
+
+    document.getElementById("copy").addEventListener("click", function () {
+      ta.select();
+      navigator.clipboard.writeText(ta.value).then(function () {
+        document.getElementById("status").textContent = "Copied!";
+      }).catch(function () {
+        document.getElementById("status").textContent = "Press Ctrl+C to copy";
+      });
+    });
+  })();
+</script>
