@@ -1,0 +1,19 @@
+// Optional: only needed if deploying with the wrangler CLI or the
+// "Deploy to Cloudflare" flow. The iPad path (paste worker.js into the
+// dashboard editor) does not use this file — see SETUP-IPAD.md.
+{
+  "name": "qbo-mcp",
+  "main": "worker.js",
+  "compatibility_date": "2025-08-01",
+  "kv_namespaces": [
+    {
+      "binding": "QBO_KV",
+      "id": "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+    }
+  ],
+  "vars": {
+    "QBO_ENV": "production"
+  }
+  // Secrets (set via dashboard or `wrangler secret put`):
+  //   INTUIT_CLIENT_ID, INTUIT_CLIENT_SECRET, CONNECTOR_KEY
+}
