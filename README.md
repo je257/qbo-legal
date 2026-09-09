@@ -1,5 +1,10 @@
 # qbo-legal
 
+Private Claude connectors. Besides the QuickBooks connector described below,
+this repo also contains [`ycharts-mcp/`](ycharts-mcp/README.md) — an MCP
+server connecting Claude to the YCharts API (market data: points, series,
+info, dividends, splits, securities discovery). See its README for setup.
+
 A private QuickBooks Online connector for Claude, in two parts:
 
 - **Static pages** (repo root, served by GitHub Pages) — the URLs an Intuit
