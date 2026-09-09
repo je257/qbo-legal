@@ -2,8 +2,10 @@
 
 Private Claude connectors. Besides the QuickBooks connector described below,
 this repo also contains [`ycharts-mcp/`](ycharts-mcp/README.md) — an MCP
-server connecting Claude to the YCharts API (market data: points, series,
-info, dividends, splits, securities discovery). See its README for setup.
+server connecting Claude to the full YCharts API v4 (funds, indicators,
+rendered Fundamental Charts, model portfolios, screeners, watchlists,
+timeseries tables, PDF reports, registrations, Quick Extract, and more)
+plus the legacy v3 raw-data endpoints. See its README for setup.
 
 A private QuickBooks Online connector for Claude, in two parts:
 
