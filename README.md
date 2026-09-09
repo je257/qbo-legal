@@ -14,6 +14,10 @@ A private QuickBooks Online connector for Claude, in two parts:
 Tokens and credentials stay on your own machine (`~/.qbo-mcp/`, owner-only
 file permissions). Nothing is hosted anywhere except these static pages.
 
+> **New here?** Follow the step-by-step [beginner setup guide](SETUP.md) —
+> it assumes no programming experience. The notes below are the condensed
+> version for developers.
+
 ## One-time setup
 
 ### 1. Enable GitHub Pages
@@ -38,27 +42,34 @@ The pages will be served at:
    Pages URLs above (Intuit requires them for production keys).
 5. Copy the **Client ID** and **Client Secret**.
 
-### 3. Install and authorize the server
+### 3. Install, authorize, and add to Claude
 
 Requires Node.js 18+.
 
 ```sh
 cd mcp
 npm install     # also builds (prepare script)
-node dist/index.js auth
+node dist/index.js setup
 ```
 
-`auth` prompts for the Client ID / Client Secret (stored in
-`~/.qbo-mcp/config.json`, mode 600), prints the Intuit authorization URL, and
-opens your browser. Sign in, pick your company, and approve. Intuit redirects
-to the callback page, which shows the full redirect URL — copy it and paste
-it back into the terminal. Tokens land in `~/.qbo-mcp/tokens.json`.
+`setup` runs two things in sequence:
 
-Check the connection any time with `node dist/index.js status`.
+- **`auth`** — prompts for the Client ID / Client Secret (stored in
+  `~/.qbo-mcp/config.json`, mode 600), prints the Intuit authorization URL,
+  and opens your browser. Sign in, pick your company, and approve. Intuit
+  redirects to the callback page, which shows the full redirect URL — copy
+  it and paste it back into the terminal. Tokens land in
+  `~/.qbo-mcp/tokens.json`.
+- **`install`** — registers the server in Claude Desktop's
+  `claude_desktop_config.json` automatically (existing config is backed up
+  first), then prints the equivalent `claude mcp add` one-liner for Claude
+  Code users.
 
-### 4. Add the server to Claude
+Each is also runnable on its own (`node dist/index.js auth` /
+`node dist/index.js install`), and `node dist/index.js status` checks the
+connection. After `install`, restart Claude Desktop.
 
-**Claude Code:**
+Manual registration, if you prefer it — **Claude Code:**
 
 ```sh
 claude mcp add qbo -- node /absolute/path/to/qbo-legal/mcp/dist/index.js
