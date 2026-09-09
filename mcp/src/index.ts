@@ -19,7 +19,10 @@ switch (command) {
   case "auth":
     runAuthFlow()
       .then(() => {
-        console.log(`\nNext step: node dist/index.js install  (hooks it into Claude Desktop)`);
+        console.log(
+          `\nNot added to Claude Desktop yet? Run: node dist/index.js install` +
+            `\nAlready added before? You're done — just restart Claude Desktop.`,
+        );
       })
       .catch(fail);
     break;

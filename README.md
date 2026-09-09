@@ -106,7 +106,7 @@ credentials in `~/.qbo-mcp/config.json`: `QBO_CLIENT_ID`, `QBO_CLIENT_SECRET`,
 | `qbo_delete` | Delete a transaction record |
 
 Access tokens auto-refresh; the refresh token itself expires ~100 days after
-last use, after which `qbo-mcp auth` must be re-run.
+last use, after which `node dist/index.js auth` must be re-run.
 
 ## Maintenance
 

@@ -57,10 +57,17 @@ export function tokensFromResponse(realmId: string, r: TokenResponse): TokenSet 
 
 function tryOpenBrowser(url: string): void {
   try {
-    const opener =
-      process.platform === "darwin" ? "open" : process.platform === "win32" ? "cmd" : "xdg-open";
-    const args = process.platform === "win32" ? ["/c", "start", "", url] : [url];
-    spawn(opener, args, { detached: true, stdio: "ignore" }).unref();
+    if (process.platform === "win32") {
+      // cmd.exe's `start` would split the unquoted URL at every "&", truncating
+      // the OAuth query string — hand it straight to the URL handler instead.
+      spawn("rundll32", ["url.dll,FileProtocolHandler", url], {
+        detached: true,
+        stdio: "ignore",
+      }).unref();
+      return;
+    }
+    const opener = process.platform === "darwin" ? "open" : "xdg-open";
+    spawn(opener, [url], { detached: true, stdio: "ignore" }).unref();
   } catch {
     // The URL is printed either way; opening the browser is best-effort.
   }
@@ -70,8 +77,18 @@ export async function runAuthFlow(): Promise<void> {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
   try {
     let config = loadConfig();
+    if (config) {
+      console.log(
+        `Found saved app keys (Client ID ending in ...${config.clientId.slice(-6)}, ` +
+          `${config.environment}).`,
+      );
+      const answer = (await rl.question("Press Enter to use them, or type n to enter new keys: "))
+        .trim()
+        .toLowerCase();
+      if (answer === "n" || answer === "no") config = undefined;
+    }
     if (!config) {
-      console.log("No app credentials found. Enter the keys from your Intuit developer app");
+      console.log("Enter the keys from your Intuit developer app");
       console.log("(developer.intuit.com → your app → Keys & credentials).\n");
       const clientId = (await rl.question("Client ID: ")).trim();
       const clientSecret = (await rl.question("Client Secret: ")).trim();
@@ -110,11 +127,25 @@ export async function runAuthFlow(): Promise<void> {
     if (!realmId) throw new Error("No ?realmId= parameter found in the pasted URL.");
     if (returnedState !== state) throw new Error("State mismatch — restart the auth flow.");
 
-    const tokenResponse = await exchangeToken(config, {
-      grant_type: "authorization_code",
-      code,
-      redirect_uri: config.redirectUri,
-    });
+    let tokenResponse;
+    try {
+      tokenResponse = await exchangeToken(config, {
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: config.redirectUri,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes("(401)")) {
+        throw new Error(
+          message +
+            "\n\nQuickBooks rejected the app keys. This usually means the Client ID or Client " +
+            "Secret was mistyped, or Development keys were mixed up with Production ones. Run " +
+            'the command again and type "n" when asked about the saved keys to re-enter them.',
+        );
+      }
+      throw error;
+    }
     saveTokens(tokensFromResponse(realmId, tokenResponse));
     console.log(`\nConnected to QuickBooks company ${realmId} (${config.environment}).`);
     console.log(`Tokens saved to ${configDir}. The MCP server is ready to use.`);
@@ -127,13 +158,13 @@ export function printStatus(): void {
   const config = loadConfig();
   const tokens = loadTokens();
   if (!config) {
-    console.log("Not configured. Run `qbo-mcp auth` to set up credentials.");
+    console.log("Not configured. Run `node dist/index.js auth` (from the mcp folder) to set up credentials.");
     return;
   }
   console.log(`Environment:  ${config.environment}`);
   console.log(`Redirect URI: ${config.redirectUri}`);
   if (!tokens) {
-    console.log("Not connected. Run `qbo-mcp auth` to authorize a company.");
+    console.log("Not connected. Run `node dist/index.js auth` (from the mcp folder) to authorize a company.");
     return;
   }
   console.log(`Company (realm): ${tokens.realmId}`);

@@ -46,8 +46,8 @@ export async function startServer(): Promise<void> {
       run(async () => {
         const config = loadConfig();
         const tokens = loadTokens();
-        if (!config) return { connected: false, reason: "Run `qbo-mcp auth` to configure credentials." };
-        if (!tokens) return { connected: false, environment: config.environment, reason: "Run `qbo-mcp auth` to authorize a company." };
+        if (!config) return { connected: false, reason: "In a terminal, run `node dist/index.js auth` from the project's mcp folder to configure credentials." };
+        if (!tokens) return { connected: false, environment: config.environment, reason: "In a terminal, run `node dist/index.js auth` from the project's mcp folder to authorize a company." };
         return {
           connected: true,
           environment: config.environment,
