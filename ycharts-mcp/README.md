@@ -1,20 +1,24 @@
 # ycharts-mcp
 
 A local MCP (Model Context Protocol) server that connects Claude Desktop or
-Claude Code to the [YCharts API](https://ycharts.com/v4/docs), covering the
-full API surface: point-in-time values, historical time series, security
-info, dividends, splits, spinoffs, securities discovery, and a raw-request
-escape hatch for anything else the API exposes.
+Claude Code to the **YCharts API v4** (`https://api.ycharts.com/v4`, docs at
+[ycharts.com/v4/docs](https://ycharts.com/v4/docs)), built against its
+OpenAPI 3.1 spec. It covers every v4 endpoint — funds, economic indicators,
+rendered Fundamental Charts, model portfolios, screeners, watchlists,
+security lists, timeseries tables, custom PDF reports, registrations, risk
+profiles, Quick Extract, quickflows, integrations, background jobs — plus
+the legacy **v3 data API** (raw stock/fund/index points, series, info,
+dividends, splits, spinoffs) and a raw-request escape hatch.
 
 Your API key stays on your own machine (`~/.ycharts-mcp/config.json`,
 owner-only file permissions). Nothing is hosted anywhere.
 
 ## What you need
 
-- **A YCharts API key.** API access is a YCharts subscription add-on — the
-  key comes from your YCharts account manager or
-  [sales@ycharts.com](mailto:sales@ycharts.com). Docs and sandbox:
-  [ycharts.com/v4/docs](https://ycharts.com/v4/docs).
+- **A YCharts API key** with the API V4 Add-On — find/regenerate it at
+  [ycharts.com/api_v4](https://ycharts.com/api_v4). (The v3 data tools need
+  v3 API access, a separate entitlement; `ycharts_status` reports which of
+  the two your key can reach.)
 - **Node.js 18+** ([nodejs.org](https://nodejs.org), LTS version).
 
 ## Install, authorize, and add to Claude
@@ -27,10 +31,9 @@ node dist/index.js setup
 
 `setup` runs two things in sequence:
 
-- **`auth`** — prompts for your API key, verifies it live against the
-  known YCharts API endpoints (v4 first, falling back to v3), and stores
-  the key plus the working endpoint in `~/.ycharts-mcp/config.json`
-  (mode 600).
+- **`auth`** — prompts for your API key, verifies it live against
+  api.ycharts.com (v4, then the v3 fallbacks), and stores the key plus the
+  working endpoint in `~/.ycharts-mcp/config.json` (mode 600).
 - **`install`** — registers the server in Claude Desktop's
   `claude_desktop_config.json` automatically (existing config is backed up
   first), then prints the equivalent `claude mcp add` one-liner for Claude
@@ -40,7 +43,7 @@ Each is also runnable on its own (`node dist/index.js auth` /
 `node dist/index.js install`), and `node dist/index.js status` checks the
 connection. After `install`, fully restart Claude Desktop.
 
-Manual registration, if you prefer it — **Claude Code:**
+Manual registration — **Claude Code:**
 
 ```sh
 claude mcp add ycharts -- node /absolute/path/to/qbo-legal/ycharts-mcp/dist/index.js
@@ -65,39 +68,67 @@ Environment variables override the stored config: `YCHARTS_API_KEY`,
 
 ## Tools exposed to Claude
 
+**Meta**
+
 | Tool | What it does |
 | --- | --- |
-| `ycharts_status` | Key present? Probes the API endpoints and reports connectivity |
-| `ycharts_reference` | Local cheat sheet: symbol conventions, common metric codes, filters, series params |
-| `ycharts_list_securities` | Discover securities by type with filters (sector, category, region, ...) |
-| `ycharts_points` | Latest or as-of-date values — up to 100 symbols × 100 metrics per call |
-| `ycharts_series` | Historical series with resampling, fill, and aggregation options |
-| `ycharts_info` | Descriptive fields (name, exchange, sector, fund family, ...) |
-| `ycharts_dividends` | Dividend history for companies/ETFs and mutual funds |
-| `ycharts_splits` | Stock split history |
-| `ycharts_spinoffs` | Spinoff history |
-| `ycharts_raw_request` | GET any API path — holdings, allocations, new v4 endpoints |
+| `ycharts_status` | Verifies the key against v4 and v3, reports what works |
+| `ycharts_reference` | Local cheat sheet: endpoint catalog, security-id conventions, filter/body formats |
+| `ycharts_raw_request` | GET any API path (v4 or v3) — the escape hatch |
 
-Security types and symbol conventions: `companies` covers stocks **and
-ETFs** (`AAPL`, `SPY`), `mutual_funds` uses `M:` symbols (`M:VFINX`),
-`indicators` uses `I:` symbols (`I:USICSA`), `indices` uses `^` symbols
-(`^SPX`). Ask Claude to call `ycharts_reference` when in doubt.
+**Market data**
+
+| Tool | What it does |
+| --- | --- |
+| `ycharts_funds` / `ycharts_fund_holdings` | Fund/ETF default data (1–25 symbols) and top-25 holdings |
+| `ycharts_indicators_search` | Discover economic indicator codes by region/source/category/report |
+| `ycharts_indicator_info` / `_points` / `_series` | Indicator fields, latest values, and time series (resampling, fill, aggregation) |
+| `ycharts_fundamental_chart` | **Renders a real YCharts Fundamental Chart as a PNG** — shown inline in Claude, saved to a temp file, optional shareable download URL; supports ratio/spread/correlation overlays |
+| `ycharts_v3_*` (7 tools) | Legacy v3 raw data: stock/ETF/fund/index points, series, info, dividends, splits, spinoffs, and securities discovery |
+
+**Portfolios, screens & lists**
+
+| Tool | What it does |
+| --- | --- |
+| `ycharts_model_portfolios_list` / `_get` / `_data` | Browse portfolios; get detail/calc status; bulk info, point & series calcs (e.g. `level`, `one_year_total_return`), holdings |
+| `ycharts_model_portfolio_create` / `_update` | Create model/client/household/benchmark portfolios; replace items or currency |
+| `ycharts_screeners_list` / `_get` / `_create` / `_update` / `_to_watchlist` | Saved stock & fund screeners: run them, build them from metric/universe filters, save matches as a watchlist |
+| `ycharts_security_lists` | Search all universe-filter lists (catalog, YCharts Proprietary, your own) |
+| `ycharts_watchlists_list` / `_get` / `_create` / `_update` | Watchlists (multi-security and indicator) |
+| `ycharts_timeseries_tables_list` / `_get` / `_create` / `_update` | Saved data grids of metrics × securities over time — the closest v4 gets to bulk raw data |
+| `ycharts_quickflows` / `_update` | Read or replace the quickflows list |
+
+**Advisor workflow**
+
+| Tool | What it does |
+| --- | --- |
+| `ycharts_custom_pdf_reports` / `ycharts_generate_pdf_report` | List report templates, inspect required parameters, generate the PDF (link or file) |
+| `ycharts_registrations` / `_search` / `_create` / `_update` / `_import` | Client registrations & households, incl. integration-partner search/import |
+| `ycharts_risk_profiles` | Risk profiles with targets and ranges |
+| `ycharts_quick_extract` / `_status` | Parse a local statement/holdings file into accounts + holdings |
+| `ycharts_background_job` | Poll background jobs (e.g. imports) |
 
 ## Good to know
 
-- The YCharts API is **read-only**; every tool is a GET. There is nothing
-  this connector can modify in your YCharts account.
-- Metric ("calculation") codes vary by subscription. Bad codes fail
-  per-item inside an otherwise successful response, so trying one is cheap.
-  The authoritative list is your account's Export Metric Reference Guide
-  and [ycharts.com/v4/docs](https://ycharts.com/v4/docs).
-- Batch symbols/metrics into one call (up to 100 each) rather than looping —
-  it is dramatically friendlier to YCharts rate limits.
+- Symbol conventions: stocks/ETFs `AAPL`/`SPY`, mutual funds `M:VFIAX`,
+  indices `^SPX`, indicators `I:USGDP`, portfolios `P:12345`, cash `cash`
+  (never bare `CASH` — that's a real ticker). `ycharts_reference` has the
+  full list plus the packed-filter (`key:::value,,,key:::value`) format.
+- Responses are wrapped in `{response, meta:{status,url}}`; bulk endpoints
+  return per-symbol/per-code errors inline, so partial failures still
+  return data.
+- Write tools (create/update portfolios, screeners, watchlists, tables,
+  registrations, quickflows) are marked as such for permission prompting;
+  everything else is read-only.
 - Per YCharts' API terms, data is for your internal use only;
   redistribution requires YCharts' written consent.
-- **Revoke access:** rotate/disable the key with YCharts, and/or delete
+- **Revoke access:** rotate/disable the key at
+  [ycharts.com/api_v4](https://ycharts.com/api_v4), and/or delete
   `~/.ycharts-mcp/`.
 - **Rebuild after changing the source:** `cd ycharts-mcp && npm run build`.
+- Handy: drop the API's `openapi.json`
+  (https://api.ycharts.com/v4/openapi.json) into this folder for offline
+  reference; it is the source of truth this server was built against.
 
 Independent integration built against the YCharts API. Not affiliated with
 YCharts, Inc.

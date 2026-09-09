@@ -14,14 +14,12 @@ export const DEFAULT_BASE_URL = "https://api.ycharts.com";
 export const DEFAULT_API_VERSION = "v4";
 
 /**
- * Base/version combinations probed during `auth` and `status`, most likely
- * first. YCharts has served the API from both hosts across versions, so the
- * auth flow discovers which combination the account's key actually works
- * against and stores it.
+ * Base/version combinations probed during `auth` and `status`. v4 is served
+ * from api.ycharts.com (per its OpenAPI docs); the legacy v3 data API has
+ * been served from both hosts, so both are probed for the v3 fallback tools.
  */
 export const BASE_CANDIDATES: ReadonlyArray<{ baseUrl: string; apiVersion: string }> = [
   { baseUrl: "https://api.ycharts.com", apiVersion: "v4" },
-  { baseUrl: "https://ycharts.com/api", apiVersion: "v4" },
   { baseUrl: "https://api.ycharts.com", apiVersion: "v3" },
   { baseUrl: "https://ycharts.com/api", apiVersion: "v3" },
 ];
