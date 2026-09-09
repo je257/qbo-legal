@@ -51,6 +51,6 @@ export function runInstall(): void {
   console.log(`  ${configPath}`);
   console.log(`\nNow fully quit Claude Desktop and open it again.`);
   console.log(`Then try asking Claude: "Use qbo_company_info to show my company profile."`);
-  console.log(`\n(Using Claude Code instead? Run:`);
-  console.log(`  claude mcp add qbo -- "${nodePath}" "${serverPath}" )`);
+  console.log(`\nUsing Claude Code instead? Copy and run this one line:`);
+  console.log(`  claude mcp add qbo -- "${nodePath}" "${serverPath}"`);
 }

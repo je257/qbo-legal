@@ -23,13 +23,15 @@ export class QboClient {
     const config = loadConfig();
     if (!config) {
       throw new QboError(
-        "QuickBooks app credentials are not configured. Run `qbo-mcp auth` in a terminal first.",
+        "QuickBooks app credentials are not configured. Open a terminal in the project's mcp " +
+          "folder and run `node dist/index.js auth` first.",
       );
     }
     const tokens = loadTokens();
     if (!tokens) {
       throw new QboError(
-        "No QuickBooks company is connected. Run `qbo-mcp auth` in a terminal to authorize one.",
+        "No QuickBooks company is connected. Open a terminal in the project's mcp folder and " +
+          "run `node dist/index.js auth` to authorize one.",
       );
     }
     return new QboClient(config, tokens);
@@ -53,7 +55,8 @@ export class QboClient {
   private async refresh(): Promise<void> {
     if (Date.now() > this.tokens.refreshTokenExpiresAt) {
       throw new QboError(
-        "The QuickBooks refresh token has expired. Run `qbo-mcp auth` in a terminal to reconnect.",
+        "The QuickBooks refresh token has expired. Open a terminal in the project's mcp folder " +
+          "and run `node dist/index.js auth` to reconnect.",
       );
     }
     const response = await exchangeToken(this.config, {

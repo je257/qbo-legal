@@ -34,9 +34,15 @@ Node.js is the free program that runs the connector.
 
 1. On the [GitHub page for this project](https://github.com/je257/qbo-legal),
    click the green **Code** button → **Download ZIP**.
-2. Unzip it, and move the unzipped folder somewhere permanent — for example
-   your Documents folder. **Don't delete or move this folder later** — Claude
-   runs the connector from it. (If you do move it, just redo Step 5.)
+2. Unzip the downloaded file:
+   - **Mac:** double-click the ZIP — a folder appears next to it.
+   - **Windows:** right-click the ZIP → **Extract All...** → **Extract**.
+     (Just double-clicking the ZIP only *peeks inside* it — it looks like a
+     normal folder but nothing will work from there. You must Extract.)
+3. The folder is called **`qbo-legal-main`**. Move it somewhere permanent —
+   for example your Documents folder. **Don't delete it later** — Claude runs
+   the connector from it. (If you ever move it, open a terminal in its `mcp`
+   folder — see Step 4 — and run `node dist/index.js install` again.)
 
 ## Step 3 — Get your QuickBooks keys
 
@@ -65,8 +71,8 @@ so QuickBooks knows to trust it.
 
 ## Step 4 — Open a terminal in the right folder
 
-You need the terminal to be "inside" the `mcp` folder of the project you
-downloaded.
+You need the terminal to be "inside" the `mcp` folder, which is inside the
+`qbo-legal-main` folder you unzipped.
 
 - **Mac:** open Terminal, type `cd ` (with a space after it), then drag the
   `mcp` folder from Finder onto the Terminal window, and press Enter.
@@ -85,6 +91,11 @@ takes a minute):
 npm install
 ```
 
+It should end with a line like `added 92 packages`. Lines starting with
+`npm warn` are normal and safe to ignore — only `npm error` means something
+failed. (**Windows:** if you instead see *"running scripts is disabled on
+this system"*, type `npm.cmd install` — it does the same thing.)
+
 Then run:
 
 ```
@@ -95,9 +106,13 @@ This walks you through everything:
 
 1. It asks for the **Client ID** and **Client Secret** — copy them from the
    Intuit page you kept open. For the environment and redirect questions,
-   just press Enter to accept the defaults.
+   just press Enter to accept the defaults. (Running it again later? It
+   offers your saved keys — press Enter to reuse them, or type `n` to enter
+   different ones.)
 2. Your browser opens a QuickBooks sign-in page. Sign in, pick your
-   company, and click **Connect**.
+   company, and click **Connect**. (If no page opens, or the page shows an
+   error, copy the long web address printed in the terminal and paste it
+   into your browser's address bar instead.)
 3. You land on a page titled "Authorization received" with a **Copy**
    button. Click it, go back to the terminal, paste (right-click pastes
    in PowerShell), and press Enter.
@@ -107,7 +122,9 @@ This walks you through everything:
 ## Step 6 — Restart Claude and try it
 
 1. Fully quit Claude Desktop (**Mac:** Cmd+Q. **Windows:** right-click the
-   Claude icon in the system tray → Quit) and open it again.
+   Claude icon in the system tray → Quit; if you don't see the icon, click
+   the **^** arrow at the right end of the taskbar to show hidden icons)
+   and open it again.
 2. Ask Claude:
 
    > Use qbo_company_info to show my company profile.
@@ -122,8 +139,20 @@ invoices are overdue?"
 
 - **"node: command not found"** — Node.js isn't installed or the terminal
   is stale. Redo Step 1 and open a fresh terminal.
+- **"running scripts is disabled on this system" (Windows)** — use
+  `npm.cmd install` instead of `npm install`, or run
+  `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, answer `Y`,
+  and retry.
 - **`ls` doesn't show `package.json`** — you're in the wrong folder. Redo
-  Step 4 (make sure it's the `mcp` folder *inside* the project folder).
+  Step 4 (make sure it's the `mcp` folder *inside* `qbo-legal-main`). On
+  Windows, this also happens when the ZIP was never really extracted —
+  right-click it → **Extract All** (Step 2).
+- **"Cannot find module ... dist/index.js"** — `npm install` didn't finish.
+  Run it again in the `mcp` folder and let it complete.
+- **"Token request failed (401)"** — the saved Client ID/Secret are wrong
+  (mistyped, or Development keys mixed up with Production). Run
+  `node dist/index.js setup` again and type `n` when it offers the saved
+  keys, then enter the correct ones.
 - **Intuit won't show Production keys** — finish the required app-detail
   fields (Step 3.3), including the privacy/EULA links.
 - **Browser shows an Intuit error instead of the sign-in page** — the
@@ -136,7 +165,8 @@ invoices are overdue?"
   `node dist/index.js auth` to reconnect.
 - **You moved or renamed the project folder** — run
   `node dist/index.js install` from the folder's new location.
-- **Check the connection any time** — run `node dist/index.js status`.
+- **See the saved connection details** (company, when the connection
+  expires) — run `node dist/index.js status`.
 
 ## Using Claude Code instead of Claude Desktop?
 
