@@ -63,8 +63,10 @@ claude mcp add ycharts -- node /absolute/path/to/qbo-legal/ycharts-mcp/dist/inde
 ```
 
 Environment variables override the stored config: `YCHARTS_API_KEY`,
-`YCHARTS_BASE_URL` (default `https://api.ycharts.com`),
-`YCHARTS_API_VERSION` (default `v4`), `YCHARTS_MCP_DIR`.
+`YCHARTS_BASE_URL` (v4 host, default `https://api.ycharts.com`),
+`YCHARTS_V3_BASE_URL` (legacy v3 host, defaults to the v4 host),
+`YCHARTS_MCP_DIR`. v4 tools always request `/v4/` paths and v3 tools `/v3/`
+paths — the variables move the host, never the API generation.
 
 ## Tools exposed to Claude
 
@@ -90,22 +92,21 @@ Environment variables override the stored config: `YCHARTS_API_KEY`,
 
 | Tool | What it does |
 | --- | --- |
-| `ycharts_model_portfolios_list` / `_get` / `_data` | Browse portfolios; get detail/calc status; bulk info, point & series calcs (e.g. `level`, `one_year_total_return`), holdings |
-| `ycharts_model_portfolio_create` / `_update` | Create model/client/household/benchmark portfolios; replace items or currency |
-| `ycharts_screeners_list` / `_get` / `_create` / `_update` / `_to_watchlist` | Saved stock & fund screeners: run them, build them from metric/universe filters, save matches as a watchlist |
+| `ycharts_model_portfolios_list`, `ycharts_model_portfolio_get` / `_data` / `_create` / `_update` | Browse portfolios; detail/calc status; bulk info, point & series calcs (e.g. `level`, `one_year_total_return`) and holdings; create model/client/household/benchmark portfolios; replace items or currency |
+| `ycharts_screeners_list`, `ycharts_screener_get` / `_create` / `_update` / `_to_watchlist` | Saved stock & fund screeners: run them, build them from metric/universe filters, save matches as a watchlist |
 | `ycharts_security_lists` | Search all universe-filter lists (catalog, YCharts Proprietary, your own) |
-| `ycharts_watchlists_list` / `_get` / `_create` / `_update` | Watchlists (multi-security and indicator) |
-| `ycharts_timeseries_tables_list` / `_get` / `_create` / `_update` | Saved data grids of metrics × securities over time — the closest v4 gets to bulk raw data |
-| `ycharts_quickflows` / `_update` | Read or replace the quickflows list |
+| `ycharts_watchlists_list`, `ycharts_watchlist_get` / `_create` / `_update` | Watchlists (multi-security and indicator) |
+| `ycharts_timeseries_tables_list`, `ycharts_timeseries_table_get` / `_create` / `_update` | Saved data grids of metrics × securities over time — the closest v4 gets to bulk raw data |
+| `ycharts_quickflows`, `ycharts_quickflows_update` | Read or replace the quickflows list |
 
 **Advisor workflow**
 
 | Tool | What it does |
 | --- | --- |
-| `ycharts_custom_pdf_reports` / `ycharts_generate_pdf_report` | List report templates, inspect required parameters, generate the PDF (link or file) |
-| `ycharts_registrations` / `_search` / `_create` / `_update` / `_import` | Client registrations & households, incl. integration-partner search/import |
+| `ycharts_custom_pdf_reports`, `ycharts_generate_pdf_report` | List report templates, inspect required parameters, generate the PDF (link or file) |
+| `ycharts_registrations`, `ycharts_registrations_search`, `ycharts_registration_create` / `_update` / `_import` | Client registrations & households, incl. integration-partner search/import |
 | `ycharts_risk_profiles` | Risk profiles with targets and ranges |
-| `ycharts_quick_extract` / `_status` | Parse a local statement/holdings file into accounts + holdings |
+| `ycharts_quick_extract`, `ycharts_quick_extract_status`, `ycharts_quick_extract_upload_session` | Parse a local statement/holdings file into accounts + holdings (or stage one via an upload session) |
 | `ycharts_background_job` | Poll background jobs (e.g. imports) |
 
 ## Good to know
@@ -117,9 +118,11 @@ Environment variables override the stored config: `YCHARTS_API_KEY`,
 - Responses are wrapped in `{response, meta:{status,url}}`; bulk endpoints
   return per-symbol/per-code errors inline, so partial failures still
   return data.
-- Write tools (create/update portfolios, screeners, watchlists, tables,
-  registrations, quickflows) are marked as such for permission prompting;
-  everything else is read-only.
+- Tools that change or produce something (create/update portfolios,
+  screeners, watchlists, tables, registrations, quickflows — plus PDF report
+  generation, Quick Extract submission, and upload-session creation) are
+  marked non-read-only for permission prompting; everything else is
+  read-only.
 - Per YCharts' API terms, data is for your internal use only;
   redistribution requires YCharts' written consent.
 - **Revoke access:** rotate/disable the key at

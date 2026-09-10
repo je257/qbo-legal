@@ -6,9 +6,6 @@ export class YchartsError extends Error {}
 export type V3SecurityType = "companies" | "mutual_funds" | "indicators" | "indices";
 export type V3DividendSecurityType = "companies" | "mutual_funds";
 
-/** The v3 API caps list-style path segments (symbols, metric codes) at 100 items per request. */
-const MAX_LIST_ITEMS = 100;
-
 /** A date parameter: "YYYY-MM-DD", or a negative integer meaning N periods ago. */
 export type DateParam = string | number;
 
@@ -59,13 +56,20 @@ export function isBinaryResult(value: unknown): value is BinaryResult {
   return typeof value === "object" && value !== null && (value as BinaryResult).binary === true;
 }
 
-export function joinList(items: string[] | string, what: string): string {
+/**
+ * Builds a comma-separated path segment from symbols/codes. Each item is
+ * URL-encoded individually (so "#", "?", "/" in a symbol can't truncate or
+ * reroute the request path) while the separating commas stay literal, as the
+ * API expects. `max` enforces an endpoint-documented cap (v3: 100 per list;
+ * v4 funds: 25; v4 chart securities: 10); omit it where the spec sets none.
+ */
+export function joinList(items: string[] | string, what: string, max?: number): string {
   const list = (Array.isArray(items) ? items : [items]).map((s) => s.trim()).filter(Boolean);
   if (list.length === 0) throw new YchartsError(`At least one ${what} is required.`);
-  if (list.length > MAX_LIST_ITEMS) {
-    throw new YchartsError(`Too many ${what}s: ${list.length}. YCharts allows at most ${MAX_LIST_ITEMS} per request — split the call.`);
+  if (max !== undefined && list.length > max) {
+    throw new YchartsError(`Too many ${what}s: ${list.length}. This endpoint allows at most ${max} per request — split the call.`);
   }
-  return list.join(",");
+  return list.map((s) => encodeURIComponent(s)).join(",");
 }
 
 export function formatDate(value: DateParam | undefined, name: string): string | number | undefined {
@@ -109,19 +113,16 @@ export class YchartsClient {
     return new YchartsClient(config);
   }
 
-  get baseUrl(): string {
-    return this.config.baseUrl;
-  }
-
-  get apiVersion(): string {
-    return this.config.apiVersion;
-  }
-
   async request(path: string, options: RequestOptions = {}): Promise<unknown> {
-    const version = options.version ?? this.config.apiVersion;
+    // v4 tools always hit /v4/ and v3 tools /v3/, each on its own configured
+    // host — a stored or env-supplied endpoint can move the host, never
+    // reroute one API generation's paths onto the other.
+    const version = options.version ?? "v4";
+    const baseUrl = version === "v3" ? this.config.v3BaseUrl : this.config.v4BaseUrl;
     const method = options.method ?? "GET";
-    const cleaned = path.replace(/^\/+/, "").replace(new RegExp(`^${version}/`), "");
-    let url = `${this.config.baseUrl}/${version}/${cleaned}`;
+    let cleaned = path.replace(/^\/+/, "");
+    if (cleaned.startsWith(`${version}/`)) cleaned = cleaned.slice(version.length + 1);
+    let url = `${baseUrl}/${version}/${cleaned}`;
     const query = new URLSearchParams();
     for (const [key, value] of Object.entries(options.params ?? {})) {
       if (value !== undefined && value !== "") query.set(key, String(value));
@@ -193,6 +194,13 @@ export class YchartsClient {
     if (meta?.status === "error") {
       throw new YchartsError(`YCharts error ${meta.error_code ?? ""}: ${meta.error_message ?? "unknown error"} (${method} ${url})`);
     }
+    if (body === undefined) {
+      // 2xx whose body isn't JSON (or is empty): surface something explicit
+      // rather than `undefined`, which would break the MCP text content item.
+      return text.trim() === ""
+        ? { ok: true, http_status: response.status, note: "Empty response body" }
+        : { ok: true, http_status: response.status, note: "Non-JSON response body", raw: text.slice(0, 2000) };
+    }
     return body;
   }
 
@@ -202,17 +210,20 @@ export class YchartsClient {
     return this.request(path, { params, version: "v3" });
   }
 
+  /** The v3 API caps list-style path segments at 100 items per request. */
+  private static readonly V3_MAX = 100;
+
   v3ListSecurities(type: V3SecurityType, page = 1, filters?: Record<string, string>): Promise<unknown> {
     return this.v3(type, { page, ...(filters ?? {}) });
   }
 
   v3Points(type: V3SecurityType, symbols: string[] | string, metrics: string[] | string, date?: DateParam): Promise<unknown> {
-    const path = `${type}/${joinList(symbols, "symbol")}/points/${joinList(metrics, "metric code")}`;
+    const path = `${type}/${joinList(symbols, "symbol", YchartsClient.V3_MAX)}/points/${joinList(metrics, "metric code", YchartsClient.V3_MAX)}`;
     return this.v3(path, { date: formatDate(date, "date") });
   }
 
   v3Series(type: V3SecurityType, symbols: string[] | string, metrics: string[] | string, options: SeriesOptions = {}): Promise<unknown> {
-    const path = `${type}/${joinList(symbols, "symbol")}/series/${joinList(metrics, "metric code")}`;
+    const path = `${type}/${joinList(symbols, "symbol", YchartsClient.V3_MAX)}/series/${joinList(metrics, "metric code", YchartsClient.V3_MAX)}`;
     return this.v3(path, {
       start_date: formatDate(options.startDate, "start_date"),
       end_date: formatDate(options.endDate, "end_date"),
@@ -224,7 +235,7 @@ export class YchartsClient {
   }
 
   v3Info(type: V3SecurityType, symbols: string[] | string, fields: string[] | string): Promise<unknown> {
-    return this.v3(`${type}/${joinList(symbols, "symbol")}/info/${joinList(fields, "info field")}`);
+    return this.v3(`${type}/${joinList(symbols, "symbol", YchartsClient.V3_MAX)}/info/${joinList(fields, "info field", YchartsClient.V3_MAX)}`);
   }
 
   v3Dividends(
@@ -232,7 +243,7 @@ export class YchartsClient {
     symbols: string[] | string,
     options: EventOptions & { dividendType?: string } = {},
   ): Promise<unknown> {
-    return this.v3(`${type}/${joinList(symbols, "symbol")}/dividends`, {
+    return this.v3(`${type}/${joinList(symbols, "symbol", YchartsClient.V3_MAX)}/dividends`, {
       start_date: formatDate(options.startDate, "start_date"),
       end_date: formatDate(options.endDate, "end_date"),
       dividend_type: options.dividendType,
@@ -240,14 +251,14 @@ export class YchartsClient {
   }
 
   v3Splits(symbols: string[] | string, options: EventOptions = {}): Promise<unknown> {
-    return this.v3(`companies/${joinList(symbols, "symbol")}/splits`, {
+    return this.v3(`companies/${joinList(symbols, "symbol", YchartsClient.V3_MAX)}/splits`, {
       start_date: formatDate(options.startDate, "start_date"),
       end_date: formatDate(options.endDate, "end_date"),
     });
   }
 
   v3Spinoffs(symbols: string[] | string, options: EventOptions = {}): Promise<unknown> {
-    return this.v3(`companies/${joinList(symbols, "symbol")}/spinoffs`, {
+    return this.v3(`companies/${joinList(symbols, "symbol", YchartsClient.V3_MAX)}/spinoffs`, {
       start_date: formatDate(options.startDate, "start_date"),
       end_date: formatDate(options.endDate, "end_date"),
     });
@@ -302,9 +313,18 @@ export async function probeApi(
       } catch {
         /* non-JSON body */
       }
-      if (response.ok && metaStatus !== "error") {
+      // Positive envelope confirmation required: a 200 HTML page (login
+      // redirect, marketing-site catch-all) must not count as a working API.
+      if (response.ok && metaStatus === "ok") {
         result = { ...candidate, ok: true, httpStatus: response.status, detail: "works" };
         working ??= candidate;
+      } else if (response.ok) {
+        result = {
+          ...candidate,
+          ok: false,
+          httpStatus: response.status,
+          detail: `HTTP ${response.status} but not a YCharts API envelope${metaStatus ? ` (meta.status=${metaStatus})` : ""}`,
+        };
       } else if (response.status === 401) {
         sawUnauthorized = true;
         result = { ...candidate, ok: false, httpStatus: 401, detail: "endpoint exists but the API key was rejected" };

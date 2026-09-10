@@ -83,7 +83,9 @@ export const REFERENCE = {
     background_jobs: ["GET background_jobs/{job_id} (job status/progress, e.g. registration imports)"],
   },
   series_parameters_v4: {
-    dates: 'YYYY-MM-DD, or "-N" for N periods back. Indicator series REQUIRE start_date and end_date.',
+    dates:
+      'Indicators: YYYY-MM-DD or "-N" for N periods back; series REQUIRE start_date and end_date. ' +
+      "Model portfolio points/series document YYYY-MM-DD only.",
     resample_frequency: ["daily", "weekly", "monthly", "quarterly", "yearly"],
     resample_function: ["min", "max", "mean", "sum", "first", "last"],
     fill_method: ["backward", "forward", "no_fill"],

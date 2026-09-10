@@ -46,7 +46,7 @@ function binaryContent(result: BinaryResult, label: string, extra: Record<string
 
 function ok(value: unknown): ToolResult {
   if (isBinaryResult(value)) return { content: binaryContent(value, "ycharts") };
-  return { content: [{ type: "text", text: JSON.stringify(value, null, 2) }] };
+  return { content: [{ type: "text", text: JSON.stringify(value ?? null, null, 2) }] };
 }
 
 function run(handler: () => Promise<unknown>): Promise<ToolResult> {
@@ -86,8 +86,12 @@ const sortDirectionField = z.string().optional().describe("asc | desc (default d
 const ownerFilterField = z
   .string()
   .optional()
-  .describe('Packed owner filter, e.g. "me:::true,,,public:::false,,,shared_with_me:::true" (keys joined with ",,,", key/value with ":::")');
+  .describe(
+    'Packed owner filter, e.g. "me:::true,,,shared_with_me:::true" (keys joined with ",,,", key/value with ":::"). ' +
+      "Valid keys vary by endpoint: registrations accepts me and shared_with_me; the other list endpoints also accept public.",
+  );
 const dateField = z.union([z.string(), z.number().int()]).describe('"YYYY-MM-DD", or a negative integer / "-N" for N periods back');
+const ymdDateField = z.string().describe('"YYYY-MM-DD"');
 const v4SeriesFields = {
   resample_frequency: z.string().optional().describe("daily | weekly | monthly | quarterly | yearly"),
   resample_function: z.string().optional().describe("min | max | mean | sum | first | last"),
@@ -126,20 +130,37 @@ export async function startServer(): Promise<void> {
               "No API key. In a terminal, run `node dist/index.js auth` from the project's ycharts-mcp folder, or set YCHARTS_API_KEY. Keys: https://ycharts.com/api_v4",
           };
         }
+        const configuredCandidates = [
+          { baseUrl: config.v4BaseUrl, apiVersion: "v4" },
+          { baseUrl: config.v3BaseUrl, apiVersion: "v3" },
+        ];
         const outcome = await probeApi(
           config.apiKey,
           [
-            { baseUrl: config.baseUrl, apiVersion: config.apiVersion },
-            ...BASE_CANDIDATES.filter((c) => c.baseUrl !== config.baseUrl || c.apiVersion !== config.apiVersion),
+            ...configuredCandidates,
+            ...BASE_CANDIDATES.filter((c) => !configuredCandidates.some((k) => k.baseUrl === c.baseUrl && k.apiVersion === c.apiVersion)),
           ],
           false,
         );
+        // Reports work/fail for the hosts the tools actually use; other hosts
+        // appear in probeResults only, with a re-auth hint if one of them works.
+        const v4Works = outcome.results.some((r) => r.apiVersion === "v4" && r.baseUrl === config.v4BaseUrl && r.ok);
+        const v3Works = outcome.results.some((r) => r.apiVersion === "v3" && r.baseUrl === config.v3BaseUrl && r.ok);
+        const otherHostWorks = outcome.results.some(
+          (r) => r.ok && !((r.apiVersion === "v4" && r.baseUrl === config.v4BaseUrl) || (r.apiVersion === "v3" && r.baseUrl === config.v3BaseUrl)),
+        );
         return {
           configured: true,
-          configuredEndpoint: `${config.baseUrl}/${config.apiVersion}`,
-          v4Works: outcome.results.some((r) => r.apiVersion === "v4" && r.ok),
-          v3Works: outcome.results.some((r) => r.apiVersion === "v3" && r.ok),
+          configuredEndpoints: { v4: `${config.v4BaseUrl}/v4`, v3: `${config.v3BaseUrl}/v3` },
+          v4Works,
+          v3Works,
           keyRejected: outcome.keyRejected,
+          hint:
+            !v4Works || !v3Works
+              ? otherHostWorks
+                ? "A non-configured host answered the probe — re-run `node dist/index.js auth` to store the working endpoints."
+                : "A failing generation usually means the key lacks that API entitlement (v4 Add-On vs legacy v3 access)."
+              : undefined,
           probeResults: outcome.results,
         };
       }),
@@ -174,7 +195,7 @@ export async function startServer(): Promise<void> {
       },
       annotations: { readOnlyHint: true },
     },
-    ({ symbols }) => run(() => client().request(`funds/${joinList(symbols, "symbol")}`)),
+    ({ symbols }) => run(() => client().request(`funds/${joinList(symbols, "symbol", 25)}`)),
   );
 
   server.registerTool(
@@ -312,7 +333,7 @@ export async function startServer(): Promise<void> {
     },
     ({ securities, metrics, date_range, start_date, end_date, data_format, panel_layout, overlays, get_download_url }) =>
       runRich(async () => {
-        const securitiesParam = joinList(securities, "security");
+        const securitiesParam = joinList(securities, "security", 10);
         const result = await client().request("fundamental_charts", {
           method: "POST",
           params: { securities: securitiesParam, metrics: joinList(metrics, "metric"), date_range, start_date, end_date, data_format, panel_layout },
@@ -394,9 +415,9 @@ export async function startServer(): Promise<void> {
         data_type: z.enum(["info", "points", "series", "holdings"]),
         portfolio_ids: z.array(z.union([z.number().int(), z.string()])).min(1).describe("Portfolio IDs, e.g. [123456, 567899]"),
         codes: z.array(z.string()).optional().describe("Info fields (info) or calc names (points/series); required for those types"),
-        date: dateField.optional().describe("points only: as-of date (defaults to latest)"),
-        start_date: dateField.optional().describe("series only (defaults to one day ago)"),
-        end_date: dateField.optional().describe("series only (defaults to today)"),
+        date: ymdDateField.optional().describe("points only: as-of date YYYY-MM-DD (defaults to latest)"),
+        start_date: ymdDateField.optional().describe("series only, YYYY-MM-DD (defaults to one day ago)"),
+        end_date: ymdDateField.optional().describe("series only, YYYY-MM-DD (defaults to today)"),
         ...v4SeriesFields,
         weight_type: z.string().optional().describe('holdings only, REQUIRED there: "target" or "current"'),
       },
@@ -837,7 +858,7 @@ export async function startServer(): Promise<void> {
         "records to import. Returns SerializedBookOfBusinessObject entries to pass to ycharts_registration_import.",
       inputSchema: {
         search_type: z.enum(["households", "registrations"]),
-        search_terms: z.string().describe("Terms to match against partner records"),
+        search_terms: z.string().min(1).describe("Terms to match against partner records"),
         page: pageField,
         page_size: pageSizeField,
       },
@@ -894,6 +915,20 @@ export async function startServer(): Promise<void> {
   // ------------------------------------------------------------------
   // Quick Extract / Quickflows / Background jobs
   // ------------------------------------------------------------------
+
+  server.registerTool(
+    "ycharts_quick_extract_upload_session",
+    {
+      title: "Create a Quick Extract upload session",
+      description:
+        "POST /v4/quick_extract/upload_sessions: creates an upload session for staging a Quick Extract file from a client that can't " +
+        "send the file directly. Returns {id, upload_token, upload_endpoint, accepted_types, max_bytes, expiries}; after the file is " +
+        "uploaded to that endpoint, pass the session id to ycharts_quick_extract as upload_session_id. When the file is on this " +
+        "machine, skip sessions entirely and give ycharts_quick_extract a file_path.",
+      annotations: { readOnlyHint: false, destructiveHint: false },
+    },
+    () => run(() => client().request("quick_extract/upload_sessions", { method: "POST" })),
+  );
 
   server.registerTool(
     "ycharts_quick_extract",
@@ -1000,7 +1035,7 @@ export async function startServer(): Promise<void> {
       inputSchema: {
         path: z.string().describe('Path after the version, e.g. "watchlists/123"'),
         params: z.record(z.string()).optional().describe("Query parameters"),
-        api_version: z.string().optional().describe('Override the API version for this call, e.g. "v3"'),
+        api_version: z.string().optional().describe('"v4" (default) or "v3" — v3 routes to the legacy data API host'),
       },
       annotations: { readOnlyHint: true },
     },

@@ -4,19 +4,21 @@ import { join } from "node:path";
 
 export interface AppConfig {
   apiKey: string;
-  /** API host, no trailing slash, e.g. "https://api.ycharts.com" */
-  baseUrl: string;
-  /** API version path segment, e.g. "v4" */
-  apiVersion: string;
+  /** Host serving the v4 API, no trailing slash, e.g. "https://api.ycharts.com". */
+  v4BaseUrl: string;
+  /** Host serving the legacy v3 data API, no trailing slash (may differ from v4). */
+  v3BaseUrl: string;
 }
 
-export const DEFAULT_BASE_URL = "https://api.ycharts.com";
-export const DEFAULT_API_VERSION = "v4";
+export const DEFAULT_V4_BASE_URL = "https://api.ycharts.com";
+export const DEFAULT_V3_BASE_URL = "https://api.ycharts.com";
 
 /**
  * Base/version combinations probed during `auth` and `status`. v4 is served
  * from api.ycharts.com (per its OpenAPI docs); the legacy v3 data API has
- * been served from both hosts, so both are probed for the v3 fallback tools.
+ * been served from both hosts, so both are probed. auth stores the working
+ * host per API generation — v4 tools always request /v4/ paths and v3 tools
+ * /v3/ paths, whatever the probe finds.
  */
 export const BASE_CANDIDATES: ReadonlyArray<{ baseUrl: string; apiVersion: string }> = [
   { baseUrl: "https://api.ycharts.com", apiVersion: "v4" },
@@ -38,14 +40,25 @@ function writeJson(path: string, value: unknown): void {
   chmodSync(path, 0o600);
 }
 
+/** Env var read that treats empty/whitespace values as unset. */
+function env(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  return value ? value : undefined;
+}
+
+function stripSlash(url: string): string {
+  return url.replace(/\/+$/, "");
+}
+
 export function loadConfig(): AppConfig | undefined {
   const stored = readJson<Partial<AppConfig>>(configPath) ?? {};
-  const apiKey = process.env.YCHARTS_API_KEY ?? stored.apiKey;
+  const apiKey = env("YCHARTS_API_KEY") ?? stored.apiKey;
   if (!apiKey) return undefined;
+  const v4BaseUrl = stripSlash(env("YCHARTS_BASE_URL") ?? stored.v4BaseUrl ?? DEFAULT_V4_BASE_URL);
   return {
     apiKey,
-    baseUrl: (process.env.YCHARTS_BASE_URL ?? stored.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, ""),
-    apiVersion: process.env.YCHARTS_API_VERSION ?? stored.apiVersion ?? DEFAULT_API_VERSION,
+    v4BaseUrl,
+    v3BaseUrl: stripSlash(env("YCHARTS_V3_BASE_URL") ?? stored.v3BaseUrl ?? v4BaseUrl),
   };
 }
 
