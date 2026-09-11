@@ -1,6 +1,15 @@
 # qbo-legal
 
-A private QuickBooks Online connector for Claude, in two parts:
+Private connectors for Claude:
+
+- **QuickBooks Online** — `mcp/` (documented below)
+- **Ninety.io** — [`ninety-mcp/`](ninety-mcp/README.md): To-Dos, Rocks,
+  Milestones, Issues, Scorecard measurables/scores/notes, Teams, and Users via
+  Ninety's public API, authenticated with a Personal Access Token. Setup:
+  `cd ninety-mcp && npm install && node dist/index.js setup`. See its
+  [README](ninety-mcp/README.md) for the full tool list and API caveats.
+
+The QuickBooks connector has two parts:
 
 - **Static pages** (repo root, served by GitHub Pages) — the URLs an Intuit
   developer app requires:
