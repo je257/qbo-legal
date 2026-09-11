@@ -8,7 +8,25 @@ Your Personal Access Token stays on your own machine
 (`~/.ninety-mcp/config.json`, owner-only file permissions). Nothing is hosted
 anywhere.
 
-## Setup
+## Easiest install: the Desktop extension (no terminal)
+
+`ninety.mcpb` in this folder is a one-file installer for Claude Desktop
+([download it here](https://github.com/je257/qbo-legal/raw/claude/gifted-gates-mytp5y/ninety-mcp/ninety.mcpb)).
+Open Claude Desktop → **Settings → Extensions**, drag the downloaded file in
+(or double-click it), and paste your Ninety Personal Access Token into the
+form field. That's it — no config file, no commands. The token field can be
+left blank on a machine where the terminal `auth` step already saved one.
+
+Rebuild it after changing the source:
+
+```sh
+npx -y esbuild extension/main.ts --bundle --platform=node --target=node18 \
+  --format=cjs --outfile=build/mcpb/server/index.js
+cp extension/manifest.json build/mcpb/manifest.json
+npx -y @anthropic-ai/mcpb pack build/mcpb ninety.mcpb
+```
+
+## Terminal setup (Claude Code, or if you prefer the config-file route)
 
 Requires Node.js 18+ and a Ninety Personal Access Token.
 

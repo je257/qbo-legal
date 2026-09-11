@@ -1,0 +1,43 @@
+{
+  "manifest_version": "0.2",
+  "name": "ninety",
+  "display_name": "Ninety.io",
+  "version": "0.1.0",
+  "description": "Connect Claude to Ninety.io: To-Dos, Rocks, Milestones, Issues, Scorecard, Teams, and Users.",
+  "long_description": "Full coverage of Ninety's public API (api.public.ninety.io): create, read, update, and delete To-Dos, Issues, Rocks, and Milestones; query Scorecard Measurables and write scores and notes; list Teams and look up Users. Authenticates with your Ninety Personal Access Token (User Settings → Developer Settings in Ninety). Automatic retry on rate limits.",
+  "author": {
+    "name": "je257"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/je257/qbo-legal"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"],
+      "env": {
+        "NINETY_API_TOKEN": "${user_config.api_token}"
+      }
+    }
+  },
+  "user_config": {
+    "api_token": {
+      "type": "string",
+      "title": "Ninety Personal Access Token",
+      "description": "Generate at app.ninety.io → User Settings → Developer Settings. Leave blank if you already saved a token with the terminal auth command.",
+      "sensitive": true,
+      "required": false
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "keywords": ["ninety", "eos", "scorecard", "rocks", "todos", "issues"],
+  "license": "UNLICENSED"
+}
