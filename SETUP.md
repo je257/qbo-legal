@@ -137,6 +137,24 @@ invoices are overdue?"
 
 ## If something goes wrong
 
+**Start here:** in the connector's folder (`mcp` or `paychex`), run
+
+```
+node dist/index.js doctor
+```
+
+It checks everything — Node, your saved keys, the live connection, and
+whether Claude Desktop actually knows about the connector — and prints the
+exact fix for whatever failed. The list below covers the same ground by
+hand:
+
+- **Claude restarted, but the tools are missing** (nothing under Claude
+  Desktop → Settings → Developer) — the setup command never finished, so it
+  never registered itself. This usually happens when `npm install` had
+  failed first (so `setup` errored with "Cannot find module"). Run
+  `npm.cmd install`, let it finish, then `node dist/index.js setup` again —
+  or, if it already has your keys saved, just `node dist/index.js install`.
+  Then fully quit and reopen Claude Desktop.
 - **"node: command not found"** — Node.js isn't installed or the terminal
   is stale. Redo Step 1 and open a fresh terminal.
 - **"running scripts is disabled on this system" (Windows)** — use
@@ -201,7 +219,8 @@ simpler than the QuickBooks one — there's no browser approval step.
 
    > Use paychex_companies to list my payroll companies.
 
-If something goes wrong, the fixes in "If something goes wrong" above apply
-here too — just read `mcp` as `paychex`. A "Token request failed (401)"
-means the API key or secret was mistyped: run `setup` again and type `n`
-to re-enter them.
+If something goes wrong, run `node dist/index.js doctor` in the `paychex`
+folder — it checks everything and prints the fix. The fixes in "If
+something goes wrong" above apply here too — just read `mcp` as `paychex`.
+A "Token request failed (401)" means the API key or secret was mistyped:
+run `setup` again and type `n` to re-enter them.

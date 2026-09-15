@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { printStatus, runAuthFlow } from "./auth.js";
+import { runDoctor } from "./doctor.js";
 import { runInstall } from "./install.js";
 import { startServer } from "./server.js";
 
@@ -36,12 +37,15 @@ switch (command) {
   case "status":
     printStatus();
     break;
+  case "doctor":
+    runDoctor().catch(fail);
+    break;
   case "serve":
     startServer().catch(fail);
     break;
   default:
     console.error(
-      `Unknown command: ${command}\nUsage: paychex-mcp [setup|auth|install|status|serve]`,
+      `Unknown command: ${command}\nUsage: paychex-mcp [setup|auth|install|status|doctor|serve]`,
     );
     process.exit(1);
 }

@@ -3,7 +3,7 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-function desktopConfigPath(): string {
+export function desktopConfigPath(): string {
   if (process.platform === "darwin") {
     return join(homedir(), "Library", "Application Support", "Claude", "claude_desktop_config.json");
   }
@@ -47,9 +47,20 @@ export function runInstall(): void {
   config.mcpServers = servers;
   writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n");
 
+  // Read it back so a write that silently went to the wrong place can't pass as success.
+  const check = JSON.parse(readFileSync(configPath, "utf8")) as {
+    mcpServers?: Record<string, unknown>;
+  };
+  if (!check.mcpServers?.paychex) {
+    throw new Error(`Verification failed: ${configPath} does not contain the paychex entry.`);
+  }
+
   console.log(`\nAdded the "paychex" Paychex Flex connector to Claude Desktop:`);
   console.log(`  ${configPath}`);
-  console.log(`\nNow fully quit Claude Desktop and open it again.`);
+  console.log(`\nNow fully quit Claude Desktop and open it again`);
+  console.log(`(Windows: system-tray Claude icon -> Quit. Mac: Cmd+Q. Closing the window is not enough).`);
+  console.log(`Check it worked: Claude Desktop Settings -> Developer should list "paychex".`);
+  console.log(`If anything is off, run: node dist/index.js doctor`);
   console.log(`Then try asking Claude: "Use paychex_companies to list my payroll companies."`);
   console.log(`\nUsing Claude Code instead? Copy and run this one line:`);
   console.log(`  claude mcp add paychex -- "${nodePath}" "${serverPath}"`);
