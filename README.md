@@ -1,5 +1,14 @@
 # qbo-legal
 
+Private local MCP connectors for Claude:
+
+- **[`ycharts-mcp/`](ycharts-mcp/README.md)** — YCharts API connector using
+  your own API key (v3 raw per-stock data + v4 endpoints, with a built-in
+  entitlement diagnostic). See its README for setup.
+- **`mcp/`** — `qbo-mcp`, the QuickBooks Online connector described below.
+
+---
+
 A private QuickBooks Online connector for Claude, in two parts:
 
 - **Static pages** (repo root, served by GitHub Pages) — the URLs an Intuit

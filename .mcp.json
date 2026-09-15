@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ycharts": {
+      "command": "node",
+      "args": ["ycharts-mcp/dist/index.js", "serve"],
+      "env": {
+        "YCHARTS_API_KEY": "${YCHARTS_API_KEY}"
+      }
+    }
+  }
+}
