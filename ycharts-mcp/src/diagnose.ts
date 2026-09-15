@@ -40,10 +40,21 @@ const PROBES: ProbeDef[] = [
     onFail: "Fund data endpoint failed on v4.",
   },
   {
+    name: "v4_company_price_chart (NVDA price)",
+    run: (c) =>
+      c.request("POST", "/v4/fundamental_charts", {
+        params: { securities: "NVDA", metrics: "price", date_range: "1M" },
+        body: {},
+      }),
+    onOk: "v4 chart endpoint works for entitled fields (control probe).",
+    onFail: "v4 chart endpoint failed even for 'price' — probe plumbing or key problem, not a field entitlement.",
+  },
+  {
     name: "v4_company_fundamental_chart (NVDA pe_ratio)",
     run: (c) =>
       c.request("POST", "/v4/fundamental_charts", {
-        body: { securities: ["NVDA"], metrics: ["pe_ratio"], date_range: "1M" },
+        params: { securities: "NVDA", metrics: "pe_ratio", date_range: "1M" },
+        body: {},
       }),
     onOk: "Company FUNDAMENTAL fields are licensed on v4 for this key.",
     onFail: "Company fundamental fields are NOT licensed on v4 (the known entitlement gap).",
@@ -125,8 +136,20 @@ export async function runDiagnostics(client: YchartsClient): Promise<Diagnostics
       "PARTIAL: v3 works but fundamentals are field-blocked — same entitlement gap as v4. Ask YCharts to license fundamental fields for API access.",
     );
   }
-  if (byName("v4_company_fundamental_chart")?.ok) {
+  const chartProbe = byName("v4_company_fundamental_chart");
+  if (chartProbe?.ok) {
     summary.push("v4 company fundamentals are licensed — saved screeners with fundamental fields should also read via v4.");
+  } else if (chartProbe?.blockedField) {
+    summary.push(
+      `v4 company fundamentals NOT licensed (field '${chartProbe.blockedField}' rejected) — ask YCharts to license company fundamental fields on this API key.`,
+    );
+  }
+  const v3Price = byName("v3_company_price");
+  if (!v3Price?.ok && v3Price?.status === 403) {
+    summary.push(
+      "v3 API rejected the key outright (HTTP 403): v3 access is a separate/legacy entitlement this key does not have. " +
+        "If an older integration pulled raw per-stock data, it used a different key — worth asking YCharts about v3 access or a key that has it.",
+    );
   }
   const blocked = probes.filter((p) => p.blockedField).map((p) => p.blockedField);
   if (blocked.length > 0) {
