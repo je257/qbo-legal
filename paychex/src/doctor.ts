@@ -118,8 +118,8 @@ function checkClaudeDesktop(): void {
   if (!existsSync(desktopPath)) {
     fail(
       `Claude Desktop config not found (${desktopPath})`,
-      "Run `node dist/index.js install`. If Claude Desktop isn't installed on this machine, " +
-        "install it first from claude.ai/download.",
+      "Run `node dist/index.js install` (with Claude Desktop fully quit). If Claude Desktop " +
+        "isn't installed on this machine, install it first from claude.ai/download.",
     );
     return;
   }
@@ -130,7 +130,8 @@ function checkClaudeDesktop(): void {
   } catch {
     fail(
       `Claude Desktop config has invalid JSON (${desktopPath})`,
-      "Fix or delete that file, then run `node dist/index.js install`.",
+      "Fix or delete that file, then run `node dist/index.js install` (with Claude Desktop " +
+        "fully quit).",
     );
     return;
   }
@@ -150,15 +151,16 @@ function checkClaudeDesktop(): void {
   if (!target || !existsSync(target)) {
     fail(
       `Claude Desktop points at a file that doesn't exist: ${target ?? "(none)"}`,
-      "The project folder was moved, renamed, or deleted. Run `node dist/index.js install` " +
-        "from this folder to re-register.",
+      "The project folder was moved, renamed, or deleted. Quit Claude Desktop, run " +
+        "`node dist/index.js install` from this folder, then reopen it.",
     );
   } else if (target !== thisServer) {
     warn(
       `Claude Desktop runs a different copy of the connector:\n` +
         `           registered: ${target}\n` +
         `           this folder: ${thisServer}\n` +
-        `         If this folder is the one you maintain, run \`node dist/index.js install\` here.`,
+        `         If this folder is the one you maintain, quit Claude Desktop, run\n` +
+        `         \`node dist/index.js install\` here, then reopen it.`,
     );
   } else {
     ok(`Registered in Claude Desktop (${desktopPath})`);
@@ -167,7 +169,8 @@ function checkClaudeDesktop(): void {
   if (entry.command && entry.command !== "node" && !existsSync(entry.command)) {
     fail(
       `Claude Desktop's Node.js path no longer exists: ${entry.command}`,
-      "Node.js was moved or reinstalled. Run `node dist/index.js install` to re-register.",
+      "Node.js was moved or reinstalled. Quit Claude Desktop, run " +
+        "`node dist/index.js install` to re-register, then reopen it.",
     );
   }
 }
@@ -205,8 +208,11 @@ export async function runDoctor(): Promise<void> {
     console.log("Everything checks out.");
   }
   console.log("If Claude still doesn't show the paychex tools:");
-  console.log("  - Fully quit Claude Desktop (Windows: system-tray icon -> Quit; Mac: Cmd+Q)");
-  console.log("    and reopen it — closing the window is not enough.");
+  console.log("  - Quit Claude Desktop completely (Windows: system-tray icon -> Quit, or Task");
+  console.log("    Manager -> End task on every Claude entry; Mac: Cmd+Q) — closing the window");
+  console.log("    is not enough. Then, with it still closed, run `node dist/index.js install`");
+  console.log("    once more before reopening: quitting Claude Desktop can wipe an entry that");
+  console.log("    was added while it was running.");
   console.log("  - Local connectors appear in the Claude DESKTOP app (and Claude Code),");
   console.log("    never on claude.ai in a web browser.");
   console.log('  - Check Settings -> Developer in Claude Desktop: "paychex" should be listed.');

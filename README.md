@@ -72,7 +72,9 @@ Each is also runnable on its own (`node dist/index.js auth` /
 `node dist/index.js install`), `node dist/index.js status` shows the saved
 connection, and `node dist/index.js doctor` runs a full checkup (Node,
 credentials, live API call, Claude Desktop registration) and prints the fix
-for anything broken. After `install`, restart Claude Desktop.
+for anything broken. Run `setup`/`install` with Claude Desktop fully quit —
+it reads its config only at launch and can wipe entries added while it runs
+(`install` warns when it detects it running) — then start Claude Desktop.
 
 Manual registration, if you prefer it — **Claude Code:**
 
@@ -150,6 +152,8 @@ node dist/index.js setup
 token, lists the companies the key can access (saving a default when there
 is exactly one, or letting you pick), then registers the server in Claude
 Desktop and prints the `claude mcp add` one-liner for Claude Code users.
+As with the QBO server, run it with Claude Desktop fully quit and start
+Claude Desktop afterward.
 
 As with the QBO server, `auth`, `install`, `status`, and `doctor` (full
 checkup with fixes) are also runnable individually. Manual registration —

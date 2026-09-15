@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, type ExecFileSyncOptionsWithStringEncoding } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
@@ -8,14 +8,23 @@ import { fileURLToPath } from "node:url";
 // exit from its in-memory state, wiping entries added while it was running.
 // Detecting a running instance lets install warn about that clobber.
 export function claudeDesktopRunning(): boolean {
+  const opts: ExecFileSyncOptionsWithStringEncoding = {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+    timeout: 10_000,
+  };
   try {
     if (process.platform === "win32") {
-      const out = execFileSync("tasklist", ["/FI", "IMAGENAME eq claude.exe", "/NH"], {
-        encoding: "utf8",
-      });
-      return /claude\.exe/i.test(out);
+      // Claude Code's CLI is also claude.exe, so a bare name check (tasklist)
+      // false-positives; the Desktop app is the one under ...\AnthropicClaude\.
+      const out = execFileSync(
+        "powershell.exe",
+        ["-NoProfile", "-Command", "(Get-Process claude -ErrorAction SilentlyContinue).Path"],
+        opts,
+      );
+      return /AnthropicClaude/i.test(out);
     }
-    const out = execFileSync("pgrep", ["-x", "Claude"], { encoding: "utf8" });
+    const out = execFileSync("pgrep", ["-x", "Claude"], opts);
     return out.trim() !== "";
   } catch {
     // pgrep exits non-zero on no match; any other failure means "unknown" — stay quiet.

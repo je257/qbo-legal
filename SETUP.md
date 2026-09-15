@@ -84,6 +84,12 @@ see `package.json` in the list.
 
 ## Step 5 — Connect it (two commands)
 
+**Before you run anything: if Claude Desktop is open, fully quit it now.**
+(**Windows:** right-click the Claude icon in the system tray → Quit — click
+the **^** arrow at the right end of the taskbar if the icon is hidden.
+**Mac:** Cmd+Q.) Claude Desktop can silently undo connector changes made
+while it is running, so it must stay closed until Step 6.
+
 In that terminal, run this first (it downloads the connector's parts —
 takes a minute):
 
@@ -119,12 +125,13 @@ This walks you through everything:
 4. It then adds itself to Claude Desktop automatically. You should see
    `Added the "qbo" QuickBooks connector to Claude Desktop`.
 
-## Step 6 — Restart Claude and try it
+## Step 6 — Open Claude and try it
 
-1. Fully quit Claude Desktop (**Mac:** Cmd+Q. **Windows:** right-click the
-   Claude icon in the system tray → Quit; if you don't see the icon, click
-   the **^** arrow at the right end of the taskbar to show hidden icons)
-   and open it again.
+1. Open Claude Desktop. (If it turns out it was open during Step 5 — the
+   install step prints an IMPORTANT warning when it notices — fully quit it
+   first: **Mac:** Cmd+Q; **Windows:** system-tray Claude icon → Quit. Then
+   run `node dist/index.js install` once more with it closed, and only then
+   open it — otherwise the connector you just added can be lost.)
 2. Ask Claude:
 
    > Use qbo_company_info to show my company profile.
@@ -156,7 +163,9 @@ hand:
   or, if the connect step had already succeeded earlier (the terminal
   printed a `Connected to ...` line), just `node dist/index.js install`.
   (Saved keys alone are not enough — the connection step must have
-  finished.) Then fully quit and reopen Claude Desktop.
+  finished.) Run the install/setup command with Claude Desktop fully quit,
+  and only open Claude Desktop afterward — see the next bullet for why the
+  order matters.
 - **The connector was registered, but vanished after restarting Claude** —
   Claude Desktop can rewrite its config file when it exits, wiping entries
   that were added while it was running. The order matters: **quit Claude
@@ -215,7 +224,8 @@ simpler than the QuickBooks one — there's no browser approval step.
    say it can't see any companies yet.)
 2. **Open a terminal in the `paychex` folder** — same trick as Step 4
    above, but use the `paychex` folder instead of `mcp`.
-3. **Run the two commands:**
+3. **Fully quit Claude Desktop if it's open** (system tray → Quit), then
+   **run the two commands:**
 
    ```
    npm install
@@ -224,7 +234,8 @@ simpler than the QuickBooks one — there's no browser approval step.
 
    Paste the API key and secret when asked. It confirms the connection,
    shows your company, and adds itself to Claude Desktop.
-4. **Restart Claude Desktop** (same as Step 6) and ask:
+4. **Open Claude Desktop** (same as Step 6 — quit it fully first if it was
+   open) and ask:
 
    > Use paychex_companies to list my payroll companies.
 
