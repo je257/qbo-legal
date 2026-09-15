@@ -1,5 +1,5 @@
 {
- "_source": "Current_Holding_Targets.xlsx (2026-09-16); targets at sleeve scale = total-portfolio target x 2.5 (sleeve is 40% of total). Bands are ALLOWED RELATIVE DRIFT percent: |current-target|/target*100 must stay <= band.",
+ "_source": "Targets: canonical sleeve weights from P:1746345 latest upload block (2026-07-29), identical to static portfolio 2339635. Bands: Current_Holding_Targets.xlsx Curr.Alw.Drift(Rel). Bands are ALLOWED RELATIVE DRIFT percent.",
  "staticPortfolioId": 2339635,
  "dynamicPortfolioId": 1746345,
  "positions": {
@@ -68,7 +68,7 @@
    "maxRelativeDriftPct": 45.0
   },
   "GOOGL": {
-   "sleeveTargetPct": 5.85,
+   "sleeveTargetPct": 5.84,
    "maxRelativeDriftPct": 25.0
   },
   "HD": {
@@ -100,7 +100,7 @@
    "maxRelativeDriftPct": 45.0
   },
   "META": {
-   "sleeveTargetPct": 3.625,
+   "sleeveTargetPct": 3.63,
    "maxRelativeDriftPct": 30.0
   },
   "MS": {
@@ -132,7 +132,7 @@
    "maxRelativeDriftPct": 30.0
   },
   "PEP": {
-   "sleeveTargetPct": 1.875,
+   "sleeveTargetPct": 1.88,
    "maxRelativeDriftPct": 45.0
   },
   "RSG": {
