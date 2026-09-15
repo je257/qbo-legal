@@ -9,21 +9,27 @@ interface StoredConfig {
   apiKey?: string;
 }
 
+function realKey(value: string | undefined): string | undefined {
+  const key = value?.trim();
+  // An unexpanded config placeholder like "${YCHARTS_API_KEY}" is not a key.
+  if (!key || (key.startsWith("${") && key.endsWith("}"))) return undefined;
+  return key;
+}
+
 export function loadApiKey(): string | undefined {
-  const fromEnv = process.env.YCHARTS_API_KEY?.trim();
+  const fromEnv = realKey(process.env.YCHARTS_API_KEY);
   if (fromEnv) return fromEnv;
   if (!existsSync(configPath)) return undefined;
   try {
     const stored = JSON.parse(readFileSync(configPath, "utf8")) as StoredConfig;
-    const key = stored.apiKey?.trim();
-    return key ? key : undefined;
+    return realKey(stored.apiKey);
   } catch {
     return undefined;
   }
 }
 
 export function keySource(): "env" | "file" | "none" {
-  if (process.env.YCHARTS_API_KEY?.trim()) return "env";
+  if (realKey(process.env.YCHARTS_API_KEY)) return "env";
   if (loadApiKey()) return "file";
   return "none";
 }
