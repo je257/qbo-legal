@@ -1,0 +1,215 @@
+{
+ "_source": "Current_Holding_Targets.xlsx (2026-09-16); targets at sleeve scale = total-portfolio target x 2.5 (sleeve is 40% of total). Bands are ALLOWED RELATIVE DRIFT percent: |current-target|/target*100 must stay <= band.",
+ "staticPortfolioId": 2339527,
+ "dynamicPortfolioId": 1746345,
+ "positions": {
+  "AAPL": {
+   "sleeveTargetPct": 6.5,
+   "maxRelativeDriftPct": 25.0
+  },
+  "ABBV": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "AMAT": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "AMGN": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "AMZN": {
+   "sleeveTargetPct": 3.65,
+   "maxRelativeDriftPct": 30.0
+  },
+  "APH": {
+   "sleeveTargetPct": 2.5,
+   "maxRelativeDriftPct": 30.0
+  },
+  "AXP": {
+   "sleeveTargetPct": 1.5,
+   "maxRelativeDriftPct": 45.0
+  },
+  "BKNG": {
+   "sleeveTargetPct": 1.75,
+   "maxRelativeDriftPct": 45.0
+  },
+  "BKR": {
+   "sleeveTargetPct": 1.65,
+   "maxRelativeDriftPct": 45.0
+  },
+  "BNY": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "BX": {
+   "sleeveTargetPct": 1.5,
+   "maxRelativeDriftPct": 45.0
+  },
+  "CEG": {
+   "sleeveTargetPct": 1.3,
+   "maxRelativeDriftPct": 45.0
+  },
+  "COST": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "CVX": {
+   "sleeveTargetPct": 1.0,
+   "maxRelativeDriftPct": 55.0
+  },
+  "DHR": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "ECL": {
+   "sleeveTargetPct": 1.5,
+   "maxRelativeDriftPct": 45.0
+  },
+  "GOOGL": {
+   "sleeveTargetPct": 5.85,
+   "maxRelativeDriftPct": 25.0
+  },
+  "HD": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "IDXX": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "JPM": {
+   "sleeveTargetPct": 3.0,
+   "maxRelativeDriftPct": 30.0
+  },
+  "KMI": {
+   "sleeveTargetPct": 1.35,
+   "maxRelativeDriftPct": 45.0
+  },
+  "LLY": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "LMT": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "LRCX": {
+   "sleeveTargetPct": 1.5,
+   "maxRelativeDriftPct": 45.0
+  },
+  "META": {
+   "sleeveTargetPct": 3.625,
+   "maxRelativeDriftPct": 30.0
+  },
+  "MS": {
+   "sleeveTargetPct": 1.5,
+   "maxRelativeDriftPct": 45.0
+  },
+  "MSFT": {
+   "sleeveTargetPct": 5.7,
+   "maxRelativeDriftPct": 25.0
+  },
+  "NEE": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "NEM": {
+   "sleeveTargetPct": 1.0,
+   "maxRelativeDriftPct": 55.0
+  },
+  "NFLX": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "NVDA": {
+   "sleeveTargetPct": 6.5,
+   "maxRelativeDriftPct": 25.0
+  },
+  "PANW": {
+   "sleeveTargetPct": 2.5,
+   "maxRelativeDriftPct": 30.0
+  },
+  "PEP": {
+   "sleeveTargetPct": 1.875,
+   "maxRelativeDriftPct": 45.0
+  },
+  "RSG": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "SCHW": {
+   "sleeveTargetPct": 2.5,
+   "maxRelativeDriftPct": 30.0
+  },
+  "TROW": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "UNH": {
+   "sleeveTargetPct": 1.5,
+   "maxRelativeDriftPct": 45.0
+  },
+  "UNP": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "VRT": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "WMT": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "XOM": {
+   "sleeveTargetPct": 1.0,
+   "maxRelativeDriftPct": 55.0
+  },
+  "YUM": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "ZTS": {
+   "sleeveTargetPct": 1.5,
+   "maxRelativeDriftPct": 45.0
+  },
+  "BR": {
+   "sleeveTargetPct": 2.0,
+   "maxRelativeDriftPct": 45.0
+  },
+  "CTVA": {
+   "sleeveTargetPct": 1.0,
+   "maxRelativeDriftPct": 55.0
+  },
+  "DDOG": {
+   "sleeveTargetPct": 2.5,
+   "maxRelativeDriftPct": 30.0
+  },
+  "DKS": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "HON": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "IBKR": {
+   "sleeveTargetPct": 1.5,
+   "maxRelativeDriftPct": 45.0
+  },
+  "KLAC": {
+   "sleeveTargetPct": 1.75,
+   "maxRelativeDriftPct": 45.0
+  },
+  "OTIS": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  },
+  "ULTA": {
+   "sleeveTargetPct": 1.25,
+   "maxRelativeDriftPct": 45.0
+  }
+ }
+}
