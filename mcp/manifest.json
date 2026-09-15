@@ -1,0 +1,18 @@
+{
+  "manifest_version": "0.2",
+  "name": "qbo-mcp",
+  "display_name": "QuickBooks Online",
+  "version": "0.1.0",
+  "description": "QuickBooks Online tools: queries, reports, records, and record create/update/delete.",
+  "author": {
+    "name": "je257"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"]
+    }
+  }
+}

@@ -74,6 +74,20 @@ Known failure chain, in the order it usually happens:
    verify the entry is in the file (doctor or Get-Content), (4) only then
    launch Claude Desktop. `install` detects a running Claude Desktop and
    prints this warning itself.
+   **Escalation (observed on the owner's newer Claude Desktop build,
+   2026-09):** the app rewrites the file even at launch and while running
+   (its own `preferences` keys keep appearing, e.g. an `autoResumeRateLimit`
+   entry referencing a live session), and entries added to the file are
+   discarded even when present at launch — the quit-first procedure was
+   followed correctly and paychex still never appeared. On such builds the
+   file route is dead for NEW servers (old entries like `qbo`, held in the
+   app's internal store, keep working). The reliable path is a **Desktop
+   Extension**: each connector folder has a committed `manifest.json` +
+   `.mcpbignore`; run `npx -y @anthropic-ai/mcpb pack` (Windows:
+   `npx.cmd`) in the folder to produce `<name>-0.1.0.mcpb`, then install it
+   via Claude Desktop → Settings → Extensions (double-clicking the file also
+   works). Saved credentials in `~/.paychex-mcp` / `~/.qbo-mcp` are used
+   unchanged. See SETUP.md "Plan B".
 
 Claude Desktop's config file: `%APPDATA%\Claude\claude_desktop_config.json`
 (Windows), `~/Library/Application Support/Claude/claude_desktop_config.json`

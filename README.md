@@ -199,6 +199,18 @@ All Paychex tools are read-only.
   developer.paychex.com, and/or delete `~/.paychex-mcp/`.
 - **Rebuild after changing the source:** `cd paychex && npm run build`.
 
+## Desktop Extension fallback
+
+Newer Claude Desktop builds manage `claude_desktop_config.json` themselves
+and discard entries added from outside, so `install` may never take effect
+(the symptom: the connector never appears under Settings → Developer). Both
+connector folders carry a `manifest.json` for packaging as a [Desktop
+Extension](https://www.anthropic.com/engineering/desktop-extensions):
+`npx -y @anthropic-ai/mcpb pack` in `paychex/` or `mcp/` produces a
+`.mcpb` file; install it via Claude Desktop → Settings → Extensions (or by
+double-clicking it). Saved credentials are used unchanged. See SETUP.md
+"Plan B" for the step-by-step version.
+
 ---
 
 Independent integrations built on the Intuit Developer and Paychex Developer

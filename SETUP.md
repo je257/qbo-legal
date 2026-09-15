@@ -239,6 +239,37 @@ simpler than the QuickBooks one — there's no browser approval step.
 
    > Use paychex_companies to list my payroll companies.
 
+---
+
+## Plan B — install as a Desktop Extension
+
+Some newer versions of Claude Desktop manage the config file themselves and
+**discard connector entries added to it from outside** — the symptom is
+that the connector never shows up under Settings → Developer no matter how
+carefully you follow the steps above (existing older entries keep working).
+If that's you, install the connector through Claude Desktop's own
+Extensions screen instead:
+
+1. Open a terminal in the connector's folder (`paychex` or `mcp`, as in
+   Step 4) and run:
+
+   ```
+   npx.cmd -y @anthropic-ai/mcpb pack
+   ```
+
+   (On Mac/Linux: `npx -y @anthropic-ai/mcpb pack`.) It downloads a small
+   packaging tool and produces a file like `paychex-mcp-0.1.0.mcpb` in the
+   folder.
+2. Find that `.mcpb` file in File Explorer and **double-click it** — Claude
+   Desktop opens an install prompt; click **Install**. (Alternative: Claude
+   Desktop → Settings → Extensions → Advanced settings → Install
+   extension… → pick the file. If it refuses because the extension is
+   unsigned, allow unsigned/development extensions under Extensions →
+   Advanced settings and retry.)
+3. The connector now appears under Settings → Extensions and survives
+   restarts. Your saved keys keep working — no need to redo the auth step.
+4. Ask Claude: "Use paychex_companies to list my payroll companies."
+
 If something goes wrong, run `node dist/index.js doctor` in the `paychex`
 folder — it checks everything and prints the fix. The fixes in "If
 something goes wrong" above apply here too — just read `mcp` as `paychex`.
