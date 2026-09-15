@@ -1,0 +1,25 @@
+{
+  "name": "hw-sleeve",
+  "version": "0.1.0",
+  "description": "HW stock sleeve manager: drift monitoring, benchmark comparison, and portfolio management on the YCharts API",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "sleeve": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
+    "start": "node dist/index.js",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  }
+}

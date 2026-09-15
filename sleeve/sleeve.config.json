@@ -1,0 +1,41 @@
+{
+  "_comment": "EDIT ME: portfolioId is the YCharts model portfolio id of the live sleeve (run `node dist/index.js portfolios` to list yours). driftBands are tiers by TARGET weight: a position whose target weight is >= minTargetWeightPct uses the first matching tier's maxRelativeDriftPct (relative drift = (current-target)/target).",
+  "portfolioId": null,
+  "universeScreenerId": 1871434,
+  "benchmark": {
+    "fundProxy": "SPY",
+    "indexSymbol": "^SPXTR"
+  },
+  "sectorBandPct": 5,
+  "maxActiveSharePct": 40,
+  "driftBands": [
+    { "minTargetWeightPct": 5, "maxRelativeDriftPct": 20 },
+    { "minTargetWeightPct": 2, "maxRelativeDriftPct": 35 },
+    { "minTargetWeightPct": 1, "maxRelativeDriftPct": 50 },
+    { "minTargetWeightPct": 0, "maxRelativeDriftPct": 75 }
+  ],
+  "characteristicsCalcs": [
+    "weighted_average_pe_ratio",
+    "weighted_average_price_to_book_ratio_generic",
+    "average_market_cap_generic",
+    "dividend_payout_ratio_generic",
+    "ytd_total_return",
+    "one_year_total_return",
+    "drift",
+    "number_of_holdings_generic",
+    "percent_of_assets_in_top_10_holdings"
+  ],
+  "sectorCalcs": [
+    "technology",
+    "financial_services",
+    "healthcare",
+    "industrials",
+    "consumer_cyclical",
+    "communication_services",
+    "utilities",
+    "basic_materials",
+    "consumer_defensive",
+    "energy",
+    "real_estate_exposure"
+  ]
+}
