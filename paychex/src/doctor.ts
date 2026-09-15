@@ -1,18 +1,20 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { BASE_URL, fetchToken } from "./auth.js";
-import { configDir, loadConfig } from "./config.js";
+import { AppConfig, configDir, loadConfig } from "./config.js";
 import { desktopConfigPath } from "./install.js";
 
 const SERVER_KEY = "paychex";
 
 let failures = 0;
+let warnings = 0;
 
 function ok(message: string): void {
   console.log(`  [ok]   ${message}`);
 }
 
 function warn(message: string): void {
+  warnings += 1;
   console.log(`  [warn] ${message}`);
 }
 
@@ -27,7 +29,16 @@ function firstLine(error: unknown): string {
 }
 
 async function checkPaychexApi(): Promise<void> {
-  const config = loadConfig();
+  let config: AppConfig | undefined;
+  try {
+    config = loadConfig();
+  } catch {
+    fail(
+      "The saved credentials file is unreadable (corrupt JSON)",
+      `Delete the folder ${configDir} and run \`node dist/index.js auth\` again.`,
+    );
+    return;
+  }
   if (!config) {
     fail(
       "No Paychex credentials saved",
@@ -77,8 +88,18 @@ async function checkPaychexApi(): Promise<void> {
       `Can access ${companies.length} ${companies.length === 1 ? "company" : "companies"}: ` +
         companies.map((c) => c.legalName ?? c.displayId ?? c.companyId ?? "?").join(", "),
     );
-    if (config.companyId) {
-      ok(`Default company: ${config.companyId}`);
+    const savedCompanyId = config.companyId;
+    if (savedCompanyId) {
+      if (companies.some((c) => c.companyId === savedCompanyId)) {
+        ok(`Default company: ${savedCompanyId}`);
+      } else {
+        fail(
+          `The saved default company (${savedCompanyId}) is not among the companies this ` +
+            "key can access — company-scoped tools will fail",
+          "Run `node dist/index.js auth` to re-pick the default (or unset the " +
+            "PAYCHEX_COMPANY_ID environment variable if you set one).",
+        );
+      }
     } else if (companies.length > 1) {
       warn(
         "No default company saved — run `node dist/index.js auth` to pick one, or pass " +
@@ -150,6 +171,8 @@ function checkClaudeDesktop(): void {
 }
 
 export async function runDoctor(): Promise<void> {
+  failures = 0;
+  warnings = 0;
   console.log("Paychex connector checkup\n");
 
   const nodeMajor = Number(process.versions.node.split(".")[0]);
@@ -166,15 +189,23 @@ export async function runDoctor(): Promise<void> {
   checkClaudeDesktop();
 
   console.log("");
-  if (failures === 0) {
-    console.log("Everything checks out. If Claude still doesn't show the paychex tools:");
-    console.log("  - Fully quit Claude Desktop (Windows: system-tray icon -> Quit; Mac: Cmd+Q)");
-    console.log("    and reopen it — closing the window is not enough.");
-    console.log("  - Local connectors appear in the Claude DESKTOP app (and Claude Code),");
-    console.log("    never on claude.ai in a web browser.");
-    console.log('  - Check Settings -> Developer in Claude Desktop: "paychex" should be listed.');
-  } else {
+  if (failures > 0) {
     console.log(`${failures} problem(s) found — apply the fixes above, then run this again.`);
     process.exitCode = 1;
+    return;
   }
+  if (warnings > 0) {
+    console.log(
+      `No hard failures, but ${warnings} warning(s) above — read them before assuming all is well.`,
+    );
+    console.log("");
+  } else {
+    console.log("Everything checks out.");
+  }
+  console.log("If Claude still doesn't show the paychex tools:");
+  console.log("  - Fully quit Claude Desktop (Windows: system-tray icon -> Quit; Mac: Cmd+Q)");
+  console.log("    and reopen it — closing the window is not enough.");
+  console.log("  - Local connectors appear in the Claude DESKTOP app (and Claude Code),");
+  console.log("    never on claude.ai in a web browser.");
+  console.log('  - Check Settings -> Developer in Claude Desktop: "paychex" should be listed.');
 }

@@ -47,12 +47,18 @@ export function runInstall(): void {
   config.mcpServers = servers;
   writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n");
 
-  // Read it back so a write that silently went to the wrong place can't pass as success.
+  // Read it back: if the existing config had an unexpected shape (e.g. "mcpServers"
+  // as an array), JSON.stringify can silently drop the new entry.
   const check = JSON.parse(readFileSync(configPath, "utf8")) as {
     mcpServers?: Record<string, unknown>;
   };
   if (!check.mcpServers?.paychex) {
-    throw new Error(`Verification failed: ${configPath} does not contain the paychex entry.`);
+    throw new Error(
+      `Verification failed: ${configPath} does not contain the paychex entry.\n` +
+        `That file has an unexpected structure. Open it and fix (or remove) its "mcpServers" ` +
+        `section — or delete the whole file if Claude Desktop has no other connectors — then ` +
+        `run \`node dist/index.js install\` again.`,
+    );
   }
 
   console.log(`\nAdded the "paychex" Paychex Flex connector to Claude Desktop:`);

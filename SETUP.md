@@ -153,8 +153,10 @@ hand:
   never registered itself. This usually happens when `npm install` had
   failed first (so `setup` errored with "Cannot find module"). Run
   `npm.cmd install`, let it finish, then `node dist/index.js setup` again —
-  or, if it already has your keys saved, just `node dist/index.js install`.
-  Then fully quit and reopen Claude Desktop.
+  or, if the connect step had already succeeded earlier (the terminal
+  printed a `Connected to ...` line), just `node dist/index.js install`.
+  (Saved keys alone are not enough — the connection step must have
+  finished.) Then fully quit and reopen Claude Desktop.
 - **"node: command not found"** — Node.js isn't installed or the terminal
   is stale. Redo Step 1 and open a fresh terminal.
 - **"running scripts is disabled on this system" (Windows)** — use

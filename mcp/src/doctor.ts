@@ -1,18 +1,20 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { configDir, loadConfig, loadTokens } from "./config.js";
+import { AppConfig, TokenSet, configDir, loadConfig, loadTokens } from "./config.js";
 import { desktopConfigPath } from "./install.js";
 import { QboClient, QboError } from "./qbo.js";
 
 const SERVER_KEY = "qbo";
 
 let failures = 0;
+let warnings = 0;
 
 function ok(message: string): void {
   console.log(`  [ok]   ${message}`);
 }
 
 function warn(message: string): void {
+  warnings += 1;
   console.log(`  [warn] ${message}`);
 }
 
@@ -27,7 +29,16 @@ function firstLine(error: unknown): string {
 }
 
 async function checkQboApi(): Promise<void> {
-  const config = loadConfig();
+  let config: AppConfig | undefined;
+  try {
+    config = loadConfig();
+  } catch {
+    fail(
+      "The saved credentials file is unreadable (corrupt JSON)",
+      `Delete the folder ${configDir} and run \`node dist/index.js auth\` again.`,
+    );
+    return;
+  }
   if (!config) {
     fail(
       "No QuickBooks app credentials saved",
@@ -41,7 +52,16 @@ async function checkQboApi(): Promise<void> {
       `${config.environment})`,
   );
 
-  const tokens = loadTokens();
+  let tokens: TokenSet | undefined;
+  try {
+    tokens = loadTokens();
+  } catch {
+    fail(
+      "The saved connection file is unreadable (corrupt JSON)",
+      `Delete the folder ${configDir} and run \`node dist/index.js auth\` again.`,
+    );
+    return;
+  }
   if (!tokens) {
     fail(
       "No QuickBooks company is connected",
@@ -69,12 +89,27 @@ async function checkQboApi(): Promise<void> {
     const name = info.CompanyInfo?.CompanyName;
     ok(`QuickBooks answered${name ? `: ${name}` : ""}`);
   } catch (error) {
-    fail(
-      `QuickBooks API check failed: ${firstLine(error)}`,
-      error instanceof QboError
-        ? "Follow the message above (usually `node dist/index.js auth` to reconnect)."
-        : "Check the internet connection and retry.",
-    );
+    const message = firstLine(error);
+    if (/Token request failed \((400|401)/.test(message)) {
+      // The token refresh was rejected server-side: revoked connection, a refresh
+      // token rotated by auth run from another copy, or a regenerated secret.
+      fail(
+        `QuickBooks rejected the saved connection: ${message}`,
+        "The connection was revoked or the app keys changed. Run `node dist/index.js auth` " +
+          "to reconnect.",
+      );
+    } else if (error instanceof QboError) {
+      fail(
+        `QuickBooks API check failed: ${message}`,
+        "Follow the message above (usually `node dist/index.js auth` to reconnect).",
+      );
+    } else {
+      fail(
+        `QuickBooks API check failed: ${message}`,
+        "Check the internet connection and retry; if it keeps failing, run " +
+          "`node dist/index.js auth` to reconnect.",
+      );
+    }
   }
 }
 
@@ -138,6 +173,8 @@ function checkClaudeDesktop(): void {
 }
 
 export async function runDoctor(): Promise<void> {
+  failures = 0;
+  warnings = 0;
   console.log("QuickBooks connector checkup\n");
 
   const nodeMajor = Number(process.versions.node.split(".")[0]);
@@ -154,15 +191,23 @@ export async function runDoctor(): Promise<void> {
   checkClaudeDesktop();
 
   console.log("");
-  if (failures === 0) {
-    console.log("Everything checks out. If Claude still doesn't show the qbo tools:");
-    console.log("  - Fully quit Claude Desktop (Windows: system-tray icon -> Quit; Mac: Cmd+Q)");
-    console.log("    and reopen it — closing the window is not enough.");
-    console.log("  - Local connectors appear in the Claude DESKTOP app (and Claude Code),");
-    console.log("    never on claude.ai in a web browser.");
-    console.log('  - Check Settings -> Developer in Claude Desktop: "qbo" should be listed.');
-  } else {
+  if (failures > 0) {
     console.log(`${failures} problem(s) found — apply the fixes above, then run this again.`);
     process.exitCode = 1;
+    return;
   }
+  if (warnings > 0) {
+    console.log(
+      `No hard failures, but ${warnings} warning(s) above — read them before assuming all is well.`,
+    );
+    console.log("");
+  } else {
+    console.log("Everything checks out.");
+  }
+  console.log("If Claude still doesn't show the qbo tools:");
+  console.log("  - Fully quit Claude Desktop (Windows: system-tray icon -> Quit; Mac: Cmd+Q)");
+  console.log("    and reopen it — closing the window is not enough.");
+  console.log("  - Local connectors appear in the Claude DESKTOP app (and Claude Code),");
+  console.log("    never on claude.ai in a web browser.");
+  console.log('  - Check Settings -> Developer in Claude Desktop: "qbo" should be listed.');
 }

@@ -47,9 +47,11 @@ Known failure chain, in the order it usually happens:
 3. **`setup` = auth + install; if auth errors (or never ran), install never
    runs**, so nothing is written to Claude Desktop's config. The user
    restarts Claude Desktop and the tools are simply absent — no error
-   anywhere. Fix: run `node dist/index.js install` (credentials already
-   saved) or re-run `setup`. `install` now verifies its write and says what
-   to check.
+   anywhere. Fix: re-run `setup`. `install` alone suffices only when auth
+   had already completed (a `Connected ...` line was printed) — for QBO,
+   keys are saved BEFORE the browser step, so saved keys do not imply a
+   connected company. `install` now verifies its write and says what to
+   check.
 4. **Claude Desktop wasn't fully quit** — closing the window is not enough.
    Windows: system-tray Claude icon → Quit (the `^` overflow arrow may hide
    it). Then reopen and check Settings → Developer for the server name.
