@@ -89,10 +89,15 @@ Known failure chain, in the order it usually happens:
    app's internal store, keep working). The reliable path is a **Desktop
    Extension**: each connector folder has a committed `manifest.json` +
    `.mcpbignore`; run `npx -y @anthropic-ai/mcpb pack` (Windows:
-   `npx.cmd`) in the folder to produce `<name>-0.1.0.mcpb`, then install it
-   via Claude Desktop → Settings → Extensions (double-clicking the file also
-   works). Saved credentials in `~/.paychex-mcp` / `~/.qbo-mcp` are used
-   unchanged. See SETUP.md "Plan B".
+   `npx.cmd`) in the folder to produce `<name>-<version>.mcpb`, then
+   install it via Claude Desktop → Settings → Extensions → Advanced
+   settings → Install extension… Saved credentials in `~/.paychex-mcp` /
+   `~/.qbo-mcp` are used unchanged. See SETUP.md "Plan B".
+   **CONFIRMED WORKING (2026-09-15):** the owner installed paychex-mcp
+   this way and the tools came alive — Plan B is the proven install path
+   on their machine. Do NOT suggest double-clicking the `.mcpb`: with no
+   file association Windows opens it in a text editor ("a bunch of
+   gibberish"); go straight to the Install extension… picker.
 
 Claude Desktop's config file: `%APPDATA%\Claude\claude_desktop_config.json`
 (Windows), `~/Library/Application Support/Claude/claude_desktop_config.json`

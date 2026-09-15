@@ -260,12 +260,12 @@ Extensions screen instead:
    (On Mac/Linux: `npx -y @anthropic-ai/mcpb pack`.) It downloads a small
    packaging tool and produces a file like `paychex-mcp-0.1.0.mcpb` in the
    folder.
-2. Find that `.mcpb` file in File Explorer and **double-click it** — Claude
-   Desktop opens an install prompt; click **Install**. (Alternative: Claude
-   Desktop → Settings → Extensions → Advanced settings → Install
-   extension… → pick the file. If it refuses because the extension is
-   unsigned, allow unsigned/development extensions under Extensions →
-   Advanced settings and retry.)
+2. In Claude Desktop, go to **Settings → Extensions → Advanced settings →
+   Install extension…**, pick the `.mcpb` file from the connector's folder,
+   and click **Install**. (If it refuses because the extension is unsigned,
+   allow unsigned/development extensions under those same Advanced settings
+   and retry. Don't bother double-clicking the `.mcpb` file — without a
+   file association Windows just opens it as gibberish in a text editor.)
 3. The connector now appears under Settings → Extensions and survives
    restarts. Your saved keys keep working — no need to redo the auth step.
 4. Ask Claude: "Use paychex_companies to list my payroll companies."
