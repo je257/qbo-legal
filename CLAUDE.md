@@ -24,6 +24,11 @@ root are served by GitHub Pages for the Intuit app (callback/privacy/EULA).
 - They use **Claude Desktop**. Local MCP servers only appear in the Desktop
   app (Settings → Developer) or Claude Code — never on claude.ai in a
   browser.
+- When dictating PowerShell commands that create files: their Windows
+  PowerShell 5.1 `Set-Content -Encoding UTF8` writes a UTF-8 BOM, which
+  JSON parsers (mcpb's manifest validator among them) reject with
+  "Unexpected token ''". For ASCII-only content use `-Encoding ASCII`;
+  otherwise `[IO.File]::WriteAllText($path, $text)` (BOM-less UTF-8).
 
 ## Recurring setup failures (seen multiple times — check these FIRST)
 
