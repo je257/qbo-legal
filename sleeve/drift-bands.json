@@ -212,5 +212,13 @@
    "maxRelativeDriftPct": 45.0
   }
  },
- "_note": "Static sleeve = 2339635 (rebalance never; reset to target only on band breach). Superseded: 2339527 (daily rebalance, delete in UI). Test portfolio for PATCH behavior: 2339524."
+ "_note": "Static sleeve = 2339635 (rebalance never; reset to target only on band breach). Superseded: 2339527 (daily rebalance, delete in UI). Test portfolio for PATCH behavior: 2339524.",
+ "notifications": {
+  "emails": [
+   "je@hwexec.com",
+   "john.ginn@nm.com",
+   "carson.abney@nm.com"
+  ],
+  "mode": "breach-only"
+ }
 }
