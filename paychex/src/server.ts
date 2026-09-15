@@ -34,7 +34,7 @@ const companyIdField = z
   );
 
 export async function startServer(): Promise<void> {
-  const server = new McpServer({ name: "paychex-mcp", version: "0.1.0" });
+  const server = new McpServer({ name: "paychex-mcp", version: "0.2.0" });
 
   server.registerTool(
     "paychex_auth_status",
@@ -161,6 +161,29 @@ export async function startServer(): Promise<void> {
         }
         return client.companyChecks(companyId, payPeriodId);
       }),
+  );
+
+  server.registerTool(
+    "paychex_write",
+    {
+      title: "Write to the Paychex API",
+      description:
+        "Create or change Paychex Flex data through any documented write endpoint — the body is the " +
+        "JSON per the Paychex API reference (developer.paychex.com), and the call succeeds only for " +
+        "operations the API key's entitlements allow. Examples: POST /companies/{companyId}/workers " +
+        "to add a worker; PATCH /workers/{workerId} to update one; POST " +
+        "/workers/{workerId}/communications to add an address or phone. THIS CHANGES REAL PAYROLL " +
+        "DATA — restate exactly what will change and confirm with the user before calling.",
+      inputSchema: {
+        method: z.enum(["POST", "PATCH", "PUT", "DELETE"]).describe("HTTP method per the endpoint's docs"),
+        path: z.string().describe('API path starting with "/", with real IDs substituted'),
+        body: z.record(z.unknown()).optional().describe("JSON request body per the Paychex API"),
+        query: z.record(z.string()).optional().describe("Query parameters, if the endpoint takes any"),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: true },
+    },
+    ({ method, path, body, query }) =>
+      run(() => PaychexClient.load().write(method, path, body, query)),
   );
 
   server.registerTool(

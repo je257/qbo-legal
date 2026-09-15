@@ -106,8 +106,12 @@ path. Hand-editing that file is the fallback when `install` can't run.
   (`config.ts`, `auth.ts`, `<api>.ts`, `server.ts`, `install.ts`,
   `doctor.ts`, `index.ts`), same error-message style ("what happened + the
   exact command to fix it", written for a non-programmer).
-- Paychex tools are read-only by design; payroll writes need an explicit
-  owner decision.
+- Paychex shipped read-only by design; on 2026-09-15 the owner explicitly
+  requested write capability ("I entitled the API to have full
+  capabilities"), so `paychex_write` (generic POST/PATCH/PUT/DELETE,
+  destructive-hinted, confirm-before-writing description) was added.
+  Keep any further write conveniences within that decision — and treat
+  payroll-mutating behavior changes as needing the owner's say-so.
 - After source changes, rebuild (`npm run build`) and update README.md and
   SETUP.md — the owner installs from SETUP.md's copy-paste commands, and
   wrong docs cost a full support round-trip.

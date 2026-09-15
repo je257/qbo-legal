@@ -4,6 +4,7 @@ import { BASE_URL, fetchToken } from "./auth.js";
 export class PaychexError extends Error {}
 
 type Query = Record<string, string | number | undefined>;
+type Method = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 export class PaychexClient {
   private config: AppConfig;
@@ -41,7 +42,11 @@ export class PaychexClient {
     return this.token.accessToken;
   }
 
-  async get(path: string, options: { query?: Query } = {}): Promise<unknown> {
+  async request(
+    method: Method,
+    path: string,
+    options: { query?: Query; body?: unknown } = {},
+  ): Promise<unknown> {
     if (!path.startsWith("/")) {
       throw new PaychexError('The API path must start with "/", e.g. "/companies".');
     }
@@ -55,7 +60,13 @@ export class PaychexClient {
 
     const doFetch = (accessToken: string) =>
       fetch(url, {
-        headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
+        method,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+          ...(options.body !== undefined ? { "Content-Type": "application/json" } : {}),
+        },
+        body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
       });
 
     let res = await doFetch(await this.ensureAccessToken());
@@ -69,6 +80,19 @@ export class PaychexClient {
       throw new PaychexError(`Paychex API error (${res.status} ${res.statusText}): ${text}`);
     }
     return text ? JSON.parse(text) : {};
+  }
+
+  get(path: string, options: { query?: Query } = {}): Promise<unknown> {
+    return this.request("GET", path, options);
+  }
+
+  write(
+    method: Exclude<Method, "GET">,
+    path: string,
+    body?: Record<string, unknown>,
+    query?: Query,
+  ): Promise<unknown> {
+    return this.request(method, path, { body, query });
   }
 
   async resolveCompanyId(explicit?: string): Promise<string> {

@@ -181,7 +181,10 @@ Environment variables override the stored config: `PAYCHEX_CLIENT_ID`,
 
 ### Tools exposed to Claude
 
-All Paychex tools are read-only.
+All tools except `paychex_write` are read-only. `paychex_write` (added at
+the owner's request once the API key was entitled for full capabilities)
+can create and change real payroll data — Claude is instructed to confirm
+each write before making it.
 
 | Tool | What it does |
 | --- | --- |
@@ -192,6 +195,7 @@ All Paychex tools are read-only.
 | `paychex_pay_periods` | Pay periods (check dates, status) |
 | `paychex_checks` | Pay checks by pay period or by worker |
 | `paychex_get` | Any other GET endpoint (jobs, pay components, pay rates, ...) |
+| `paychex_write` | POST/PATCH/PUT/DELETE to any documented write endpoint |
 
 ### Maintenance
 
