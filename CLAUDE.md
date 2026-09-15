@@ -62,6 +62,18 @@ Known failure chain, in the order it usually happens:
    approve). No re-setup needed once linked.
 7. **QBO: 401 on token exchange** → mistyped Client ID/Secret or
    Development/Production keys mixed up. Re-run auth, type `n`, re-enter.
+8. **Claude Desktop REWRITES `claude_desktop_config.json` and wipes entries
+   added while it was running.** Observed directly (2026-09): the file held
+   `qbo` + `ninety` + `paychex`; after a restart it held only `qbo` (the one
+   entry the app knew at its last launch) plus the app's own `preferences`
+   keys. This is the root cause behind "I installed it, restarted, and the
+   tools are gone" — and it silently killed the owner's Ninety connector the
+   same way. The procedure that sticks, in this order: (1) quit Claude
+   Desktop completely and verify in Task Manager that no Claude processes
+   remain, (2) run `node dist/index.js install` while it is closed, (3)
+   verify the entry is in the file (doctor or Get-Content), (4) only then
+   launch Claude Desktop. `install` detects a running Claude Desktop and
+   prints this warning itself.
 
 Claude Desktop's config file: `%APPDATA%\Claude\claude_desktop_config.json`
 (Windows), `~/Library/Application Support/Claude/claude_desktop_config.json`

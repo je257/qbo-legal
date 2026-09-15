@@ -1,7 +1,27 @@
+import { execFileSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+// Claude Desktop reads its config only at launch and can REWRITE the file on
+// exit from its in-memory state, wiping entries added while it was running.
+// Detecting a running instance lets install warn about that clobber.
+export function claudeDesktopRunning(): boolean {
+  try {
+    if (process.platform === "win32") {
+      const out = execFileSync("tasklist", ["/FI", "IMAGENAME eq claude.exe", "/NH"], {
+        encoding: "utf8",
+      });
+      return /claude\.exe/i.test(out);
+    }
+    const out = execFileSync("pgrep", ["-x", "Claude"], { encoding: "utf8" });
+    return out.trim() !== "";
+  } catch {
+    // pgrep exits non-zero on no match; any other failure means "unknown" — stay quiet.
+    return false;
+  }
+}
 
 export function desktopConfigPath(): string {
   if (process.platform === "darwin") {
@@ -63,9 +83,20 @@ export function runInstall(): void {
 
   console.log(`\nAdded the "qbo" QuickBooks connector to Claude Desktop:`);
   console.log(`  ${configPath}`);
-  console.log(`\nNow fully quit Claude Desktop and open it again`);
-  console.log(`(Windows: system-tray Claude icon -> Quit. Mac: Cmd+Q. Closing the window is not enough).`);
-  console.log(`Check it worked: Claude Desktop Settings -> Developer should list "qbo".`);
+  if (claudeDesktopRunning()) {
+    console.log(`\n*** IMPORTANT: Claude Desktop is RUNNING right now. ***`);
+    console.log(`When it exits, it can rewrite its config file and WIPE the entry just added.`);
+    console.log(`Do this, in this order:`);
+    console.log(`  1. Quit Claude Desktop completely (Windows: system-tray icon -> Quit, or`);
+    console.log(`     Task Manager -> End task on every Claude entry. Mac: Cmd+Q).`);
+    console.log(`  2. With Claude Desktop closed, run \`node dist/index.js install\` again.`);
+    console.log(`  3. Only then open Claude Desktop.`);
+  } else {
+    console.log(`\nNow open Claude Desktop.`);
+    console.log(`(If it turns out it was already running: fully quit it — system-tray icon -> Quit`);
+    console.log(`on Windows, Cmd+Q on Mac — run this install again, then reopen it.)`);
+  }
+  console.log(`\nCheck it worked: Claude Desktop Settings -> Developer should list "qbo".`);
   console.log(`If anything is off, run: node dist/index.js doctor`);
   console.log(`Then try asking Claude: "Use qbo_company_info to show my company profile."`);
   console.log(`\nUsing Claude Code instead? Copy and run this one line:`);

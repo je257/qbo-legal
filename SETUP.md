@@ -157,6 +157,13 @@ hand:
   printed a `Connected to ...` line), just `node dist/index.js install`.
   (Saved keys alone are not enough — the connection step must have
   finished.) Then fully quit and reopen Claude Desktop.
+- **The connector was registered, but vanished after restarting Claude** —
+  Claude Desktop can rewrite its config file when it exits, wiping entries
+  that were added while it was running. The order matters: **quit Claude
+  Desktop completely first** (Windows: press Ctrl+Shift+Esc for Task
+  Manager, End task on every Claude entry), **then** run
+  `node dist/index.js install`, and only then open Claude Desktop. The
+  install command warns you when it detects Claude Desktop running.
 - **"node: command not found"** — Node.js isn't installed or the terminal
   is stale. Redo Step 1 and open a fresh terminal.
 - **"running scripts is disabled on this system" (Windows)** — use

@@ -141,7 +141,9 @@ function checkClaudeDesktop(): void {
   if (!entry) {
     fail(
       `"${SERVER_KEY}" is not registered in Claude Desktop — this is why the tools are missing`,
-      "Run `node dist/index.js install`, then fully quit and reopen Claude Desktop.",
+      "Quit Claude Desktop completely FIRST (Windows: Task Manager -> End task on every " +
+        "Claude entry), then run `node dist/index.js install`, then reopen Claude Desktop. " +
+        "Order matters: Claude Desktop can wipe entries added while it is running.",
     );
     return;
   }
