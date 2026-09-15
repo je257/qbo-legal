@@ -34,7 +34,7 @@ const companyIdField = z
   );
 
 export async function startServer(): Promise<void> {
-  const server = new McpServer({ name: "paychex-mcp", version: "0.2.0" });
+  const server = new McpServer({ name: "paychex-mcp", version: "0.3.0" });
 
   server.registerTool(
     "paychex_auth_status",
@@ -161,6 +161,27 @@ export async function startServer(): Promise<void> {
         }
         return client.companyChecks(companyId, payPeriodId);
       }),
+  );
+
+  server.registerTool(
+    "paychex_payroll_history",
+    {
+      title: "Payroll history",
+      description:
+        "Payroll history for a date range in one call: finds every pay period whose start, end, or " +
+        "check date falls in the range and returns each with its pay checks (gross/net, earnings, " +
+        "taxes, deductions) — company-wide, or one worker's when workerId is given. Most recent " +
+        "first, capped at 30 periods per call. For a single known pay period use paychex_checks.",
+      inputSchema: {
+        from: z.string().describe("Range start, YYYY-MM-DD"),
+        to: z.string().describe("Range end, YYYY-MM-DD"),
+        workerId: z.string().optional().describe("Restrict to this worker's checks"),
+        companyId: companyIdField,
+      },
+      annotations: { readOnlyHint: true },
+    },
+    ({ from, to, workerId, companyId }) =>
+      run(() => PaychexClient.load().payrollHistory(from, to, companyId, workerId)),
   );
 
   server.registerTool(

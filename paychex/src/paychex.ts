@@ -142,4 +142,61 @@ export class PaychexClient {
       query: { payperiodid: payPeriodId },
     });
   }
+
+  async payrollHistory(
+    from: string,
+    to: string,
+    companyId?: string,
+    workerId?: string,
+  ): Promise<unknown> {
+    const dateForm = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateForm.test(from) || !dateForm.test(to)) {
+      throw new PaychexError("from and to must be dates in YYYY-MM-DD form.");
+    }
+    const id = await this.resolveCompanyId(companyId);
+    const body = (await this.get(`/companies/${encodeURIComponent(id)}/payperiods`)) as {
+      content?: Record<string, unknown>[];
+    };
+    const inRange = (value: unknown): boolean =>
+      typeof value === "string" && value.slice(0, 10) >= from && value.slice(0, 10) <= to;
+    const sortKey = (p: Record<string, unknown>) =>
+      String(p.checkDate ?? p.endDate ?? p.startDate ?? "");
+    const matching = (body.content ?? [])
+      .filter((p) => inRange(p.checkDate) || inRange(p.endDate) || inRange(p.startDate))
+      .sort((a, b) => sortKey(b).localeCompare(sortKey(a)));
+
+    const MAX_PERIODS = 30;
+    const periods = [];
+    for (const payPeriod of matching.slice(0, MAX_PERIODS)) {
+      const periodId = payPeriod.payPeriodId ?? payPeriod.id;
+      let checks: unknown;
+      if (typeof periodId === "string") {
+        try {
+          const checksBody = (await (workerId
+            ? this.workerChecks(workerId, periodId)
+            : this.companyChecks(id, periodId))) as { content?: unknown };
+          checks = checksBody.content ?? checksBody;
+        } catch (error) {
+          checks = { error: error instanceof Error ? error.message : String(error) };
+        }
+      } else {
+        checks = { error: "Pay period record has no recognizable ID — fetch it via paychex_get." };
+      }
+      periods.push({ payPeriod, checks });
+    }
+
+    return {
+      companyId: id,
+      from,
+      to,
+      ...(workerId ? { workerId } : {}),
+      payPeriodsFound: matching.length,
+      ...(matching.length > MAX_PERIODS
+        ? {
+            note: `Only the ${MAX_PERIODS} most recent pay periods are included — narrow the date range for the rest.`,
+          }
+        : {}),
+      periods,
+    };
+  }
 }

@@ -194,6 +194,7 @@ each write before making it.
 | `paychex_worker` | One worker's full record by workerId |
 | `paychex_pay_periods` | Pay periods (check dates, status) |
 | `paychex_checks` | Pay checks by pay period or by worker |
+| `paychex_payroll_history` | Pay periods in a date range, each with its checks |
 | `paychex_get` | Any other GET endpoint (jobs, pay components, pay rates, ...) |
 | `paychex_write` | POST/PATCH/PUT/DELETE to any documented write endpoint |
 
