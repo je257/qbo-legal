@@ -1,6 +1,6 @@
 {
  "_source": "Current_Holding_Targets.xlsx (2026-09-16); targets at sleeve scale = total-portfolio target x 2.5 (sleeve is 40% of total). Bands are ALLOWED RELATIVE DRIFT percent: |current-target|/target*100 must stay <= band.",
- "staticPortfolioId": 2339527,
+ "staticPortfolioId": 2339635,
  "dynamicPortfolioId": 1746345,
  "positions": {
   "AAPL": {
@@ -211,5 +211,6 @@
    "sleeveTargetPct": 1.25,
    "maxRelativeDriftPct": 45.0
   }
- }
+ },
+ "_note": "Static sleeve = 2339635 (rebalance never; reset to target only on band breach). Superseded: 2339527 (daily rebalance, delete in UI). Test portfolio for PATCH behavior: 2339524."
 }
