@@ -172,3 +172,36 @@ invoices are overdue?"
 
 After Step 5's `setup` finishes, it prints a `claude mcp add qbo ...`
 command — copy and run that one line, and skip Step 6's restart.
+
+---
+
+## Also connecting Paychex Flex (payroll)?
+
+This project includes a second connector for Paychex Flex. It's even
+simpler than the QuickBooks one — there's no browser approval step.
+
+1. **Get your Paychex keys.** Sign in at
+   [developer.paychex.com](https://developer.paychex.com) and create an
+   application (any name works). Copy its **API key** and **secret**. Then
+   link your Paychex Flex company to the application in the portal — a
+   company admin has to approve it. (If you skip this, the connector will
+   say it can't see any companies yet.)
+2. **Open a terminal in the `paychex` folder** — same trick as Step 4
+   above, but use the `paychex` folder instead of `mcp`.
+3. **Run the two commands:**
+
+   ```
+   npm install
+   node dist/index.js setup
+   ```
+
+   Paste the API key and secret when asked. It confirms the connection,
+   shows your company, and adds itself to Claude Desktop.
+4. **Restart Claude Desktop** (same as Step 6) and ask:
+
+   > Use paychex_companies to list my payroll companies.
+
+If something goes wrong, the fixes in "If something goes wrong" above apply
+here too — just read `mcp` as `paychex`. A "Token request failed (401)"
+means the API key or secret was mistyped: run `setup` again and type `n`
+to re-enter them.

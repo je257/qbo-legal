@@ -1,6 +1,6 @@
 # qbo-legal
 
-A private QuickBooks Online connector for Claude, in two parts:
+Private accounting connectors for Claude, in three parts:
 
 - **Static pages** (repo root, served by GitHub Pages) — the URLs an Intuit
   developer app requires:
@@ -10,9 +10,12 @@ A private QuickBooks Online connector for Claude, in two parts:
     authorization code for the terminal auth flow
 - **`mcp/`** — `qbo-mcp`, a local MCP (Model Context Protocol) server that
   connects Claude Desktop or Claude Code to your QuickBooks Online company.
+- **`paychex/`** — `paychex-mcp`, a local MCP server that connects Claude to
+  Paychex Flex payroll (see [Paychex Flex connector](#paychex-flex-connector)).
 
-Tokens and credentials stay on your own machine (`~/.qbo-mcp/`, owner-only
-file permissions). Nothing is hosted anywhere except these static pages.
+Tokens and credentials stay on your own machine (`~/.qbo-mcp/` and
+`~/.paychex-mcp/`, owner-only file permissions). Nothing is hosted anywhere
+except these static pages.
 
 > **New here?** Follow the step-by-step [beginner setup guide](SETUP.md) —
 > it assumes no programming experience. The notes below are the condensed
@@ -114,5 +117,82 @@ last use, after which `node dist/index.js auth` must be re-run.
   apps, and/or delete `~/.qbo-mcp/`.
 - **Rebuild after changing the source:** `cd mcp && npm run build`.
 
-Independent integration built on the Intuit Developer platform. Not
-affiliated with Intuit Inc.
+## Paychex Flex connector
+
+`paychex/` is a second, independent MCP server for Paychex Flex payroll. It
+uses OAuth 2.0 client credentials — no browser approval step and no refresh
+token that can expire: short-lived access tokens are requested automatically
+from the stored API key/secret.
+
+### 1. Get API credentials
+
+1. Sign in at [developer.paychex.com](https://developer.paychex.com) and
+   create an application (or open an existing one).
+2. Copy the application's **API key** (client ID) and **secret**.
+3. Link your Paychex Flex company to the application in the developer
+   portal — a company admin must approve the access. Until this is done the
+   API reports no companies.
+
+### 2. Install, authorize, and add to Claude
+
+Requires Node.js 18+.
+
+```sh
+cd paychex
+npm install     # also builds (prepare script)
+node dist/index.js setup
+```
+
+`setup` prompts for the API key and secret (stored in
+`~/.paychex-mcp/config.json`, mode 600), verifies them by requesting a
+token, lists the companies the key can access (saving a default when there
+is exactly one, or letting you pick), then registers the server in Claude
+Desktop and prints the `claude mcp add` one-liner for Claude Code users.
+
+As with the QBO server, `auth`, `install`, and `status` are also runnable
+individually. Manual registration — **Claude Code:**
+
+```sh
+claude mcp add paychex -- node /absolute/path/to/qbo-legal/paychex/dist/index.js
+```
+
+**Claude Desktop** (`claude_desktop_config.json` → `mcpServers`):
+
+```json
+{
+  "mcpServers": {
+    "paychex": {
+      "command": "node",
+      "args": ["/absolute/path/to/qbo-legal/paychex/dist/index.js"]
+    }
+  }
+}
+```
+
+Environment variables override the stored config: `PAYCHEX_CLIENT_ID`,
+`PAYCHEX_CLIENT_SECRET`, `PAYCHEX_COMPANY_ID`, `PAYCHEX_MCP_DIR`.
+
+### Tools exposed to Claude
+
+All Paychex tools are read-only.
+
+| Tool | What it does |
+| --- | --- |
+| `paychex_auth_status` | Credentials, default company, and token expiry |
+| `paychex_companies` | Companies the API key can access |
+| `paychex_workers` | Workers of a company (paged with limit/offset) |
+| `paychex_worker` | One worker's full record by workerId |
+| `paychex_pay_periods` | Pay periods (check dates, status) |
+| `paychex_checks` | Pay checks by pay period or by worker |
+| `paychex_get` | Any other GET endpoint (jobs, pay components, pay rates, ...) |
+
+### Maintenance
+
+- **Revoke access:** unlink the company or deactivate the application at
+  developer.paychex.com, and/or delete `~/.paychex-mcp/`.
+- **Rebuild after changing the source:** `cd paychex && npm run build`.
+
+---
+
+Independent integrations built on the Intuit Developer and Paychex Developer
+platforms. Not affiliated with Intuit Inc. or Paychex, Inc.
