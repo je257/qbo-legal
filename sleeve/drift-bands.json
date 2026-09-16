@@ -1,6 +1,6 @@
 {
  "_source": "Targets: canonical sleeve weights from P:1746345 latest upload block (2026-07-29), identical to static portfolio 2339635. Bands: Current_Holding_Targets.xlsx Curr.Alw.Drift(Rel). Bands are ALLOWED RELATIVE DRIFT percent.",
- "staticPortfolioId": 2339635,
+ "staticPortfolioId": 2340898,
  "dynamicPortfolioId": 1746345,
  "positions": {
   "AAPL": {
@@ -212,7 +212,7 @@
    "maxRelativeDriftPct": 45.0
   }
  },
- "_note": "Static sleeve = 2339635 (rebalance never; reset to target only on band breach). Superseded: 2339527 (daily rebalance, delete in UI). Test portfolio for PATCH behavior: 2339524.",
+ "_note": "Static sleeve = 2340898 (targets as of 2026-07-29, rebalance never, band-breach resets only). Superseded (delete in UI): 2339527 (v1, daily rebalance), 2339635 (v2, wrong 2022 series start). PATCH-behavior test portfolio: 2339524.",
  "notifications": {
   "emails": [
    "je@hwexec.com",
