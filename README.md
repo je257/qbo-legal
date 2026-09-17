@@ -195,6 +195,9 @@ each write before making it.
 | `paychex_pay_periods` | Pay periods (check dates, status) |
 | `paychex_checks` | Pay checks by pay period or by worker |
 | `paychex_payroll_history` | Pay periods in a date range, each with its checks |
+| `paychex_departments` | The company's organization units (departments) |
+| `paychex_workers_by_department` | Roster segmented by department |
+| `paychex_department_costs` | Monthly payroll cost per department over a date range |
 | `paychex_get` | Any other GET endpoint (jobs, pay components, pay rates, ...) |
 | `paychex_write` | POST/PATCH/PUT/DELETE to any documented write endpoint |
 

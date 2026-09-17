@@ -2,8 +2,8 @@
   "manifest_version": "0.2",
   "name": "paychex-mcp",
   "display_name": "Paychex Flex Payroll",
-  "version": "0.3.0",
-  "description": "Paychex Flex payroll tools: read companies, workers, pay periods, checks and payroll history, plus a guarded write tool for creating and updating records.",
+  "version": "0.4.0",
+  "description": "Paychex Flex payroll tools: workers by department, monthly payroll cost per department, payroll history, pay periods and checks, plus a guarded write tool.",
   "author": {
     "name": "je257"
   },

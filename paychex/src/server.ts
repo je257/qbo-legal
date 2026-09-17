@@ -34,7 +34,7 @@ const companyIdField = z
   );
 
 export async function startServer(): Promise<void> {
-  const server = new McpServer({ name: "paychex-mcp", version: "0.3.0" });
+  const server = new McpServer({ name: "paychex-mcp", version: "0.4.0" });
 
   server.registerTool(
     "paychex_auth_status",
@@ -182,6 +182,67 @@ export async function startServer(): Promise<void> {
     },
     ({ from, to, workerId, companyId }) =>
       run(() => PaychexClient.load().payrollHistory(from, to, companyId, workerId)),
+  );
+
+  server.registerTool(
+    "paychex_departments",
+    {
+      title: "List departments",
+      description:
+        "List the company's organization units (departments) as configured in Paychex Flex — " +
+        "names, numbers, organizationIds. Use paychex_workers_by_department to see who is in each.",
+      inputSchema: { companyId: companyIdField },
+      annotations: { readOnlyHint: true },
+    },
+    ({ companyId }) =>
+      run(async () => {
+        const client = PaychexClient.load();
+        const id = await client.resolveCompanyId(companyId);
+        return client.get(`/companies/${encodeURIComponent(id)}/organizations`);
+      }),
+  );
+
+  server.registerTool(
+    "paychex_workers_by_department",
+    {
+      title: "Workers grouped by department",
+      description:
+        "The full worker roster segmented by department (each worker's organization assignment in " +
+        "Paychex Flex): per department, a headcount and the workers' IDs, names, job titles, and " +
+        "status. Fetches all pages automatically. Workers with no organization assignment appear " +
+        'under "Unassigned".',
+      inputSchema: { companyId: companyIdField },
+      annotations: { readOnlyHint: true },
+    },
+    ({ companyId }) => run(() => PaychexClient.load().workersByDepartment(companyId)),
+  );
+
+  server.registerTool(
+    "paychex_department_costs",
+    {
+      title: "Monthly payroll cost by department",
+      description:
+        "Total payroll cost per department per calendar month for a date range: fetches every pay " +
+        "period in the range with its checks, attributes each check to the worker's department " +
+        "(their organization assignment), groups by month of the check date, and sums money fields " +
+        "(default grossPay and netPay). The response includes a sampleCheck with the raw check " +
+        "fields — if totals come back zero or you need employer-side costs (employer taxes, " +
+        "benefits), read sampleCheck for the actual field names and call again passing them as " +
+        'sumFields. Checks of departed workers appear under "Not in current roster". Costs follow ' +
+        "each worker's home department; labor-distribution splits are not broken out.",
+      inputSchema: {
+        from: z.string().describe("Range start, YYYY-MM-DD"),
+        to: z.string().describe("Range end, YYYY-MM-DD"),
+        sumFields: z
+          .array(z.string())
+          .optional()
+          .describe('Money fields to sum per check (default ["grossPay", "netPay"])'),
+        companyId: companyIdField,
+      },
+      annotations: { readOnlyHint: true },
+    },
+    ({ from, to, sumFields, companyId }) =>
+      run(() => PaychexClient.load().departmentCosts(from, to, companyId, sumFields)),
   );
 
   server.registerTool(
