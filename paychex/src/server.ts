@@ -222,15 +222,20 @@ export async function startServer(): Promise<void> {
     {
       title: "Monthly payroll cost by department",
       description:
-        "Total payroll cost per department per calendar month for a date range: fetches every pay " +
-        "period in the range with its checks, attributes each check to the worker's department " +
-        "(their organization assignment), groups by month of the check date, and sums money fields " +
-        "(default grossPay and netPay). The response includes a sampleCheck with the raw check " +
-        "fields — if totals come back zero or you need employer-side costs (employer taxes, " +
-        "benefits), read sampleCheck for the actual field names and call again passing them as " +
-        'sumFields. Checks of departed workers appear under "Not in current roster". Costs follow ' +
-        "each worker's home department; labor-distribution splits are not broken out. Pass " +
-        "breakdown: true to also get per-employee subtotals inside every department cell.",
+        "Total payroll cost per department per calendar month for a date range. A pay period " +
+        "belongs to the month of its check date, and the from/to range filters by that same date, " +
+        "so months are never split across range boundaries (up to the 60 most recent periods per " +
+        "call; the notes name any truncation or partial month). Each check is attributed to a " +
+        "department recorded on the check itself when present, otherwise to the worker's CURRENT " +
+        "organization assignment applied retroactively (a mid-range transfer books all history to " +
+        "the new department — the notes say when this applies). Money fields (default grossPay and " +
+        "netPay) found once per check are used directly; found as repeated line items, the lines " +
+        "are summed. The response includes a sampleCheck with the raw check fields — if totals " +
+        "come back zero or you need employer-side costs (employer taxes, benefits), read " +
+        "sampleCheck for the actual field names and call again passing them as sumFields. Checks " +
+        'of departed workers appear under "Not in current roster". Read the notes array before ' +
+        "presenting numbers. Pass breakdown: true for per-employee subtotals inside every " +
+        "department cell.",
       inputSchema: {
         from: z.string().describe("Range start, YYYY-MM-DD"),
         to: z.string().describe("Range end, YYYY-MM-DD"),

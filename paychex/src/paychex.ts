@@ -22,36 +22,59 @@ function workerDisplayName(worker: Json): string {
   return parts.join(" ") || String(worker.workerId ?? "(unknown)");
 }
 
-// Find the first (shallowest) occurrence of a money field in a check object,
-// whatever its nesting — field names vary across Paychex resources.
-function firstNumber(value: unknown, field: string): number | undefined {
+// Extract a money field from a check, wherever it nests — field names vary
+// across Paychex resources. Two shapes exist in the wild: a check-level total
+// (a value outside any array; the shallowest one wins), and per-line amounts
+// (the same field repeated across earnings/tax/deduction line items, which
+// must be SUMMED, not sampled). usedScalar reports which shape was taken so
+// the caller can flag ambiguity when both were present.
+function extractMoney(
+  value: unknown,
+  field: string,
+): { value: number; occurrences: number; usedScalar: boolean } | undefined {
   const target = field.toLowerCase();
-  const queue: unknown[] = [value];
+  const toNumber = (entry: unknown): number | undefined => {
+    if (typeof entry === "number" && Number.isFinite(entry)) return entry;
+    if (typeof entry === "string" && entry.trim() !== "" && !Number.isNaN(Number(entry))) {
+      return Number(entry);
+    }
+    if (typeof entry === "object" && entry !== null) {
+      const amount = (entry as Json).amount;
+      if (typeof amount === "number" && Number.isFinite(amount)) return amount;
+    }
+    return undefined;
+  };
+
+  type Node = { node: unknown; inArray: boolean };
+  const queue: Node[] = [{ node: value, inArray: false }];
+  let scalar: number | undefined; // BFS ⇒ the first non-array match is the shallowest
+  let lineSum = 0;
+  let occurrences = 0;
   let visited = 0;
-  while (queue.length > 0 && visited < 1000) {
-    const current = queue.shift();
+  while (queue.length > 0 && visited < 2000) {
+    const { node, inArray } = queue.shift() as Node;
     visited += 1;
-    if (Array.isArray(current)) {
-      queue.push(...current);
+    if (Array.isArray(node)) {
+      for (const item of node) queue.push({ node: item, inArray: true });
       continue;
     }
-    if (typeof current !== "object" || current === null) continue;
-    for (const [key, entry] of Object.entries(current)) {
-      if (key.toLowerCase() !== target) continue;
-      if (typeof entry === "number" && Number.isFinite(entry)) return entry;
-      if (typeof entry === "string" && entry.trim() !== "" && !Number.isNaN(Number(entry))) {
-        return Number(entry);
+    if (typeof node !== "object" || node === null) continue;
+    for (const [key, entry] of Object.entries(node)) {
+      if (key.toLowerCase() === target) {
+        const num = toNumber(entry);
+        if (num !== undefined) {
+          occurrences += 1;
+          if (inArray) lineSum += num;
+          else scalar ??= num;
+        }
       }
-      if (typeof entry === "object" && entry !== null) {
-        const amount = (entry as Json).amount;
-        if (typeof amount === "number" && Number.isFinite(amount)) return amount;
-      }
-    }
-    for (const entry of Object.values(current)) {
-      if (typeof entry === "object" && entry !== null) queue.push(entry);
+      if (typeof entry === "object" && entry !== null) queue.push({ node: entry, inArray });
     }
   }
-  return undefined;
+  if (occurrences === 0) return undefined;
+  return scalar !== undefined
+    ? { value: scalar, occurrences, usedScalar: true }
+    : { value: lineSum, occurrences, usedScalar: false };
 }
 
 function round2(value: number): number {
@@ -270,13 +293,23 @@ export class PaychexClient {
     const ppBody = (await this.get(`/companies/${encodeURIComponent(id)}/payperiods`)) as {
       content?: Json[];
     };
-    const inRange = (value: unknown): boolean =>
-      typeof value === "string" && value.slice(0, 10) >= from && value.slice(0, 10) <= to;
-    const matching = (ppBody.content ?? []).filter(
-      (p) => inRange(p.checkDate) || inRange(p.endDate) || inRange(p.startDate),
-    );
+    // One date decides BOTH range membership and month bucket, so no period can
+    // be pulled in by one date and bucketed by another (partial "leaked" months).
+    const periodDate = (p: Json): string | undefined => {
+      for (const key of ["checkDate", "endDate", "startDate"]) {
+        const value = p[key];
+        if (typeof value === "string" && value.length >= 10) return value.slice(0, 10);
+      }
+      return undefined;
+    };
+    const matching = (ppBody.content ?? [])
+      .map((p) => ({ period: p, date: periodDate(p) }))
+      .filter((e): e is { period: Json; date: string } =>
+        e.date !== undefined && e.date >= from && e.date <= to,
+      )
+      .sort((a, b) => b.date.localeCompare(a.date)); // most recent first
     const MAX_PERIODS = 60;
-    const periods = matching.slice(0, MAX_PERIODS);
+    const included = matching.slice(0, MAX_PERIODS);
 
     type Cell = {
       checks: number;
@@ -288,13 +321,14 @@ export class PaychexClient {
     let sampleCheck: Json | undefined;
     let totalChecks = 0;
     let checksMissingAllFields = 0;
+    let checksWithOwnDept = 0;
+    const fieldsSummedAsLines = new Set<string>();
+    const fieldsWithAmbiguousShape = new Set<string>();
     const problems: string[] = [];
 
-    for (const period of periods) {
+    for (const { period, date } of included) {
       const periodId = period.payPeriodId ?? period.id;
-      const monthKey =
-        String(period.checkDate ?? period.endDate ?? period.startDate ?? "").slice(0, 7) ||
-        "unknown";
+      const monthKey = date.slice(0, 7);
       if (typeof periodId !== "string") {
         problems.push(`A pay period dated ${monthKey} has no recognizable ID; skipped.`);
         continue;
@@ -317,9 +351,17 @@ export class PaychexClient {
           typeof check.workerId === "string"
             ? check.workerId
             : ((check.worker as Json | undefined)?.workerId as string | undefined);
-        let dept = "Unknown worker";
-        if (typeof workerId === "string") {
+        // Prefer a department recorded on the check itself (historically accurate);
+        // fall back to the worker's CURRENT assignment (applied retroactively).
+        const orgOnCheck = (check.organization as Json | undefined)?.name;
+        let dept: string;
+        if (typeof orgOnCheck === "string" && orgOnCheck.trim() !== "") {
+          dept = orgOnCheck;
+          checksWithOwnDept += 1;
+        } else if (typeof workerId === "string") {
           dept = deptByWorker.get(workerId) ?? "Not in current roster";
+        } else {
+          dept = "Unknown worker";
         }
         const byDept = months.get(monthKey) ?? new Map<string, Cell>();
         months.set(monthKey, byDept);
@@ -346,11 +388,14 @@ export class PaychexClient {
         workerCell.checks += 1;
         let foundAny = false;
         for (const field of fields) {
-          const value = firstNumber(check, field);
-          if (value !== undefined) {
-            cell.totals[field] += value;
-            workerCell.totals[field] += value;
+          const extracted = extractMoney(check, field);
+          if (extracted !== undefined) {
+            cell.totals[field] += extracted.value;
+            workerCell.totals[field] += extracted.value;
             foundAny = true;
+            if (extracted.occurrences > 1) {
+              (extracted.usedScalar ? fieldsWithAmbiguousShape : fieldsSummedAsLines).add(field);
+            }
           }
         }
         if (!foundAny) checksMissingAllFields += 1;
@@ -398,8 +443,50 @@ export class PaychexClient {
 
     const notes: string[] = [...problems];
     if (matching.length > MAX_PERIODS) {
+      const oldestIncluded = included[included.length - 1].date;
       notes.push(
-        `Only the first ${MAX_PERIODS} of ${matching.length} pay periods in range were included — narrow the date range for the rest.`,
+        `Only the ${MAX_PERIODS} most recent of ${matching.length} pay periods in range were ` +
+          `included; periods dated before ${oldestIncluded} were dropped, so the ` +
+          `${oldestIncluded.slice(0, 7)} cell may be incomplete. Narrow the date range to cover ` +
+          "the rest.",
+      );
+    }
+    const lastDayOfToMonth = new Date(
+      Date.UTC(Number(to.slice(0, 4)), Number(to.slice(5, 7)), 0),
+    ).getUTCDate();
+    if (from.slice(8) !== "01") {
+      notes.push(
+        `The range starts mid-month (${from}), so the ${from.slice(0, 7)} cell covers only part of that month.`,
+      );
+    }
+    if (Number(to.slice(8)) !== lastDayOfToMonth) {
+      notes.push(
+        `The range ends mid-month (${to}), so the ${to.slice(0, 7)} cell covers only part of that month.`,
+      );
+    }
+    if (totalChecks > 0 && checksWithOwnDept === 0) {
+      notes.push(
+        "Checks carried no department of their own, so every check is attributed to the " +
+          "worker's CURRENT department assignment, applied retroactively — a worker who " +
+          "transferred between departments books all past checks to their current one.",
+      );
+    } else if (checksWithOwnDept > 0 && checksWithOwnDept < totalChecks) {
+      notes.push(
+        `${checksWithOwnDept} of ${totalChecks} checks carried their own department; the rest ` +
+          "were attributed to each worker's current assignment.",
+      );
+    }
+    if (fieldsSummedAsLines.size > 0) {
+      notes.push(
+        `Field(s) ${[...fieldsSummedAsLines].join(", ")} appear as repeated line items on ` +
+          "checks; all lines were summed per check.",
+      );
+    }
+    if (fieldsWithAmbiguousShape.size > 0) {
+      notes.push(
+        `Field(s) ${[...fieldsWithAmbiguousShape].join(", ")} appear several times per check ` +
+          "including a check-level value; the check-level value was used once per check and " +
+          "line items with the same name were ignored — verify against sampleCheck.",
       );
     }
     if (checksMissingAllFields > 0) {
