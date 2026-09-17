@@ -229,7 +229,8 @@ export async function startServer(): Promise<void> {
         "fields — if totals come back zero or you need employer-side costs (employer taxes, " +
         "benefits), read sampleCheck for the actual field names and call again passing them as " +
         'sumFields. Checks of departed workers appear under "Not in current roster". Costs follow ' +
-        "each worker's home department; labor-distribution splits are not broken out.",
+        "each worker's home department; labor-distribution splits are not broken out. Pass " +
+        "breakdown: true to also get per-employee subtotals inside every department cell.",
       inputSchema: {
         from: z.string().describe("Range start, YYYY-MM-DD"),
         to: z.string().describe("Range end, YYYY-MM-DD"),
@@ -237,12 +238,16 @@ export async function startServer(): Promise<void> {
           .array(z.string())
           .optional()
           .describe('Money fields to sum per check (default ["grossPay", "netPay"])'),
+        breakdown: z
+          .boolean()
+          .optional()
+          .describe("Also include per-employee subtotals within each department (default false)"),
         companyId: companyIdField,
       },
       annotations: { readOnlyHint: true },
     },
-    ({ from, to, sumFields, companyId }) =>
-      run(() => PaychexClient.load().departmentCosts(from, to, companyId, sumFields)),
+    ({ from, to, sumFields, breakdown, companyId }) =>
+      run(() => PaychexClient.load().departmentCosts(from, to, companyId, sumFields, breakdown)),
   );
 
   server.registerTool(

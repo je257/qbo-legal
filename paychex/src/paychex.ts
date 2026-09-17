@@ -249,6 +249,7 @@ export class PaychexClient {
     to: string,
     companyId?: string,
     sumFields?: string[],
+    breakdown = false,
   ): Promise<unknown> {
     const dateForm = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateForm.test(from) || !dateForm.test(to)) {
@@ -258,9 +259,11 @@ export class PaychexClient {
     const fields = sumFields && sumFields.length > 0 ? sumFields : ["grossPay", "netPay"];
 
     const deptByWorker = new Map<string, string>();
+    const nameByWorker = new Map<string, string>();
     for (const worker of await this.allWorkers(id)) {
       if (typeof worker.workerId === "string") {
         deptByWorker.set(worker.workerId, departmentOf(worker));
+        nameByWorker.set(worker.workerId, workerDisplayName(worker));
       }
     }
 
@@ -275,7 +278,12 @@ export class PaychexClient {
     const MAX_PERIODS = 60;
     const periods = matching.slice(0, MAX_PERIODS);
 
-    type Cell = { checks: number; workerIds: Set<string>; totals: Record<string, number> };
+    type Cell = {
+      checks: number;
+      workerIds: Set<string>;
+      totals: Record<string, number>;
+      byWorker: Map<string, { checks: number; totals: Record<string, number> }>;
+    };
     const months = new Map<string, Map<string, Cell>>();
     let sampleCheck: Json | undefined;
     let totalChecks = 0;
@@ -321,15 +329,27 @@ export class PaychexClient {
             checks: 0,
             workerIds: new Set<string>(),
             totals: Object.fromEntries(fields.map((f) => [f, 0])),
+            byWorker: new Map(),
           } as Cell);
         byDept.set(dept, cell);
         cell.checks += 1;
         if (typeof workerId === "string") cell.workerIds.add(workerId);
+        const workerKey =
+          typeof workerId === "string"
+            ? (nameByWorker.get(workerId) ?? workerId)
+            : "(no worker on check)";
+        const workerCell = cell.byWorker.get(workerKey) ?? {
+          checks: 0,
+          totals: Object.fromEntries(fields.map((f) => [f, 0])),
+        };
+        cell.byWorker.set(workerKey, workerCell);
+        workerCell.checks += 1;
         let foundAny = false;
         for (const field of fields) {
           const value = firstNumber(check, field);
           if (value !== undefined) {
             cell.totals[field] += value;
+            workerCell.totals[field] += value;
             foundAny = true;
           }
         }
@@ -353,6 +373,23 @@ export class PaychexClient {
                   totals: Object.fromEntries(
                     Object.entries(cell.totals).map(([f, v]) => [f, round2(v)]),
                   ),
+                  ...(breakdown
+                    ? {
+                        byWorker: Object.fromEntries(
+                          [...cell.byWorker.entries()]
+                            .sort(([a], [b]) => a.localeCompare(b))
+                            .map(([who, wc]) => [
+                              who,
+                              {
+                                checks: wc.checks,
+                                totals: Object.fromEntries(
+                                  Object.entries(wc.totals).map(([f, v]) => [f, round2(v)]),
+                                ),
+                              },
+                            ]),
+                        ),
+                      }
+                    : {}),
                 },
               ]),
           ),
