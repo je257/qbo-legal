@@ -14,6 +14,19 @@ function departmentOf(worker: Json): string {
   return typeof name === "string" && name.trim() !== "" ? name : "Unassigned";
 }
 
+// The worker's position: their job title in Paychex Flex, whichever shape it takes.
+function positionOf(worker: Json): string {
+  const candidates = [worker.jobTitle, worker.job, worker.position];
+  for (const candidate of candidates) {
+    if (typeof candidate === "string" && candidate.trim() !== "") return candidate;
+    if (typeof candidate === "object" && candidate !== null) {
+      const title = (candidate as Json).title ?? (candidate as Json).name;
+      if (typeof title === "string" && title.trim() !== "") return title;
+    }
+  }
+  return "No position on file";
+}
+
 function workerDisplayName(worker: Json): string {
   const name = worker.name as Json | undefined;
   const parts = [name?.givenName, name?.middleName, name?.familyName].filter(
@@ -267,12 +280,13 @@ export class PaychexClient {
     };
   }
 
-  async departmentCosts(
+  async payrollCosts(
     from: string,
     to: string,
     companyId?: string,
     sumFields?: string[],
     breakdown = false,
+    groupBy: "department" | "position" | "employee" = "department",
   ): Promise<unknown> {
     const dateForm = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateForm.test(from) || !dateForm.test(to)) {
@@ -282,12 +296,27 @@ export class PaychexClient {
     const fields = sumFields && sumFields.length > 0 ? sumFields : ["grossPay", "netPay"];
 
     const deptByWorker = new Map<string, string>();
+    const positionByWorker = new Map<string, string>();
     const nameByWorker = new Map<string, string>();
-    for (const worker of await this.allWorkers(id)) {
+    const roster = await this.allWorkers(id);
+    for (const worker of roster) {
       if (typeof worker.workerId === "string") {
         deptByWorker.set(worker.workerId, departmentOf(worker));
+        positionByWorker.set(worker.workerId, positionOf(worker));
         nameByWorker.set(worker.workerId, workerDisplayName(worker));
       }
+    }
+    // Employee group keys: names, disambiguated by ID only when two workers share one.
+    const nameCounts = new Map<string, number>();
+    for (const name of nameByWorker.values()) {
+      nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
+    }
+    const employeeKeyByWorker = new Map<string, string>();
+    for (const [workerId, name] of nameByWorker) {
+      employeeKeyByWorker.set(
+        workerId,
+        (nameCounts.get(name) ?? 0) > 1 ? `${name} (${workerId})` : name,
+      );
     }
 
     const ppBody = (await this.get(`/companies/${encodeURIComponent(id)}/payperiods`)) as {
@@ -351,15 +380,26 @@ export class PaychexClient {
           typeof check.workerId === "string"
             ? check.workerId
             : ((check.worker as Json | undefined)?.workerId as string | undefined);
-        // Prefer a department recorded on the check itself (historically accurate);
-        // fall back to the worker's CURRENT assignment (applied retroactively).
-        const orgOnCheck = (check.organization as Json | undefined)?.name;
+        // Grouping key by dimension. For departments, prefer a department recorded
+        // on the check itself (historically accurate); positions and departments
+        // otherwise use the worker's CURRENT attribute, applied retroactively.
         let dept: string;
-        if (typeof orgOnCheck === "string" && orgOnCheck.trim() !== "") {
+        const orgOnCheck = (check.organization as Json | undefined)?.name;
+        if (
+          groupBy === "department" &&
+          typeof orgOnCheck === "string" &&
+          orgOnCheck.trim() !== ""
+        ) {
           dept = orgOnCheck;
           checksWithOwnDept += 1;
         } else if (typeof workerId === "string") {
-          dept = deptByWorker.get(workerId) ?? "Not in current roster";
+          const byWorkerMap =
+            groupBy === "department"
+              ? deptByWorker
+              : groupBy === "position"
+                ? positionByWorker
+                : employeeKeyByWorker;
+          dept = byWorkerMap.get(workerId) ?? (groupBy === "employee" ? workerId : "Not in current roster");
         } else {
           dept = "Unknown worker";
         }
@@ -418,7 +458,7 @@ export class PaychexClient {
                   totals: Object.fromEntries(
                     Object.entries(cell.totals).map(([f, v]) => [f, round2(v)]),
                   ),
-                  ...(breakdown
+                  ...(breakdown && groupBy !== "employee"
                     ? {
                         byWorker: Object.fromEntries(
                           [...cell.byWorker.entries()]
@@ -464,17 +504,20 @@ export class PaychexClient {
         `The range ends mid-month (${to}), so the ${to.slice(0, 7)} cell covers only part of that month.`,
       );
     }
-    if (totalChecks > 0 && checksWithOwnDept === 0) {
-      notes.push(
-        "Checks carried no department of their own, so every check is attributed to the " +
-          "worker's CURRENT department assignment, applied retroactively — a worker who " +
-          "transferred between departments books all past checks to their current one.",
-      );
-    } else if (checksWithOwnDept > 0 && checksWithOwnDept < totalChecks) {
-      notes.push(
-        `${checksWithOwnDept} of ${totalChecks} checks carried their own department; the rest ` +
-          "were attributed to each worker's current assignment.",
-      );
+    if (groupBy !== "employee") {
+      if (totalChecks > 0 && checksWithOwnDept === 0) {
+        notes.push(
+          `Every check is attributed to the worker's CURRENT ${groupBy}` +
+            (groupBy === "department" ? " (none of the checks carried their own)" : "") +
+            ", applied retroactively — a worker whose " +
+            `${groupBy} changed mid-range books all past checks to the current one.`,
+        );
+      } else if (checksWithOwnDept > 0 && checksWithOwnDept < totalChecks) {
+        notes.push(
+          `${checksWithOwnDept} of ${totalChecks} checks carried their own department; the rest ` +
+            "were attributed to each worker's current assignment.",
+        );
+      }
     }
     if (fieldsSummedAsLines.size > 0) {
       notes.push(
@@ -501,6 +544,7 @@ export class PaychexClient {
       companyId: id,
       from,
       to,
+      groupBy,
       sumFields: fields,
       payPeriodsInRange: matching.length,
       totalChecks,

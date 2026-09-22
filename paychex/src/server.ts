@@ -34,7 +34,7 @@ const companyIdField = z
   );
 
 export async function startServer(): Promise<void> {
-  const server = new McpServer({ name: "paychex-mcp", version: "0.4.0" });
+  const server = new McpServer({ name: "paychex-mcp", version: "0.5.0" });
 
   server.registerTool(
     "paychex_auth_status",
@@ -218,27 +218,32 @@ export async function startServer(): Promise<void> {
   );
 
   server.registerTool(
-    "paychex_department_costs",
+    "paychex_payroll_costs",
     {
-      title: "Monthly payroll cost by department",
+      title: "Monthly payroll costs by department, position, or employee",
       description:
-        "Total payroll cost per department per calendar month for a date range. A pay period " +
-        "belongs to the month of its check date, and the from/to range filters by that same date, " +
-        "so months are never split across range boundaries (up to the 60 most recent periods per " +
-        "call; the notes name any truncation or partial month). Each check is attributed to a " +
-        "department recorded on the check itself when present, otherwise to the worker's CURRENT " +
-        "organization assignment applied retroactively (a mid-range transfer books all history to " +
-        "the new department — the notes say when this applies). Money fields (default grossPay and " +
-        "netPay) found once per check are used directly; found as repeated line items, the lines " +
-        "are summed. The response includes a sampleCheck with the raw check fields — if totals " +
-        "come back zero or you need employer-side costs (employer taxes, benefits), read " +
-        "sampleCheck for the actual field names and call again passing them as sumFields. Checks " +
-        'of departed workers appear under "Not in current roster". Read the notes array before ' +
-        "presenting numbers. Pass breakdown: true for per-employee subtotals inside every " +
-        "department cell.",
+        "Total payroll cost per calendar month for a date range, grouped by department, position " +
+        "(job title), or employee — pick with groupBy (default department). A pay period belongs " +
+        "to the month of its check date, and the from/to range filters by that same date, so " +
+        "months are never split across range boundaries (up to the 60 most recent periods per " +
+        "call; the notes name any truncation or partial month). Department grouping prefers a " +
+        "department recorded on the check itself when present; otherwise (and for positions) each " +
+        "check follows the worker's CURRENT attribute applied retroactively — the notes say when " +
+        "this applies. Money fields (default grossPay and netPay) found once per check are used " +
+        "directly; found as repeated line items, the lines are summed. The response includes a " +
+        "sampleCheck with the raw check fields — if totals come back zero or you need " +
+        "employer-side costs (employer taxes, benefits), read sampleCheck for the actual field " +
+        'names and call again passing them as sumFields. Checks of departed workers appear under ' +
+        '"Not in current roster" (or their workerId when grouping by employee). Read the notes ' +
+        "array before presenting numbers. Pass breakdown: true for per-employee subtotals inside " +
+        "each department or position cell.",
       inputSchema: {
         from: z.string().describe("Range start, YYYY-MM-DD"),
         to: z.string().describe("Range end, YYYY-MM-DD"),
+        groupBy: z
+          .enum(["department", "position", "employee"])
+          .optional()
+          .describe("Grouping dimension (default department)"),
         sumFields: z
           .array(z.string())
           .optional()
@@ -246,13 +251,15 @@ export async function startServer(): Promise<void> {
         breakdown: z
           .boolean()
           .optional()
-          .describe("Also include per-employee subtotals within each department (default false)"),
+          .describe("Also include per-employee subtotals within each group (default false)"),
         companyId: companyIdField,
       },
       annotations: { readOnlyHint: true },
     },
-    ({ from, to, sumFields, breakdown, companyId }) =>
-      run(() => PaychexClient.load().departmentCosts(from, to, companyId, sumFields, breakdown)),
+    ({ from, to, groupBy, sumFields, breakdown, companyId }) =>
+      run(() =>
+        PaychexClient.load().payrollCosts(from, to, companyId, sumFields, breakdown, groupBy),
+      ),
   );
 
   server.registerTool(
