@@ -1,6 +1,11 @@
 # qbo-legal
 
-A private QuickBooks Online connector for Claude, in two parts:
+Private, local connectors for Claude. The main one is QuickBooks Online;
+see also **[`garmin-mcp/`](garmin-mcp/)** — a Garmin Connect connector with
+full access to wellness, sleep, training and activity data
+([setup guide](garmin-mcp/SETUP.md)).
+
+The QuickBooks Online connector is in two parts:
 
 - **Static pages** (repo root, served by GitHub Pages) — the URLs an Intuit
   developer app requires:
