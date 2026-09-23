@@ -1,6 +1,6 @@
 {
   "name": "ninety-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server connecting Claude to Ninety.io (To-Dos, Rocks, Milestones, Issues, Scorecard, Teams, Users)",
   "license": "UNLICENSED",
   "private": true,

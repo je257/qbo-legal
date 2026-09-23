@@ -12,7 +12,7 @@ export class NinetyError extends Error {
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export interface RequestOptions {
-  query?: Record<string, string | number | boolean | undefined>;
+  query?: Record<string, string | number | boolean | string[] | undefined>;
   body?: unknown;
 }
 
@@ -58,7 +58,12 @@ export class NinetyClient {
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
     const url = new URL(baseUrl() + normalizedPath);
     for (const [key, value] of Object.entries(options.query ?? {})) {
-      if (value !== undefined) url.searchParams.set(key, String(value));
+      if (value === undefined) continue;
+      if (Array.isArray(value)) {
+        for (const item of value) url.searchParams.append(key, item);
+      } else {
+        url.searchParams.set(key, String(value));
+      }
     }
 
     let lastError: NinetyError | undefined;

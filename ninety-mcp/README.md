@@ -67,20 +67,32 @@ Environment variables (override the stored config):
 | Tool | What it does |
 | --- | --- |
 | `ninety_auth_status` | Token configured? Verifies it by listing teams |
-| `ninety_teams` | List the teams the token can access |
-| `ninety_user_get` | Get a user by Id (name, primary email) |
-| `ninety_todos_query` | List/filter To-Dos (team, personal, completed, search, paging) |
-| `ninety_todo_get` / `ninety_todo_create` / `ninety_todo_update` / `ninety_todo_delete` | To-Do CRUD |
-| `ninety_issues_query` | List/filter Issues (team, short/long-term, search, paging) |
-| `ninety_issue_get` / `ninety_issue_create` / `ninety_issue_update` / `ninety_issue_delete` | Issue CRUD |
-| `ninety_rocks_query` | List/filter Rocks (team, owner, status, level, future scope, paging) |
-| `ninety_rock_get` / `ninety_rock_create` / `ninety_rock_update` / `ninety_rock_delete` | Rock CRUD (get includes milestones) |
+| `ninety_teams` / `ninety_teams_available` | List teams (yours / all you may create work for) |
+| `ninety_users` / `ninety_team_users` / `ninety_user_get` | List company users (by email too), a team's users, or one user |
+| `ninety_todos_query` | List/filter To-Dos (team, assignees, due-date range, search; `paged` for totals) |
+| `ninety_todos_company` | Company-wide To-Dos, cursor-paginated (Owners/Admins only) |
+| `ninety_todo_get` / `ninety_todo_create` / `ninety_todo_update` / `ninety_todo_delete` | To-Do CRUD (create/update can link a Rock/Issue/Milestone) |
+| `ninety_todo_comment` / `ninety_todo_link` / `ninety_todo_unlink` | Comment on a To-Do; manage its links |
+| `ninety_issues_query` / `ninety_issues_company` | List/filter Issues; company-wide list (Owners/Admins) |
+| `ninety_issue_get` / `ninety_issue_create` / `ninety_issue_update` / `ninety_issue_delete` / `ninety_issue_comment` | Issue CRUD + comments |
+| `ninety_rocks_query` / `ninety_rocks_company` | List/filter Rocks (`paged` for flat page + totals); company-wide list |
+| `ninety_rock_get` / `ninety_rock_create` / `ninety_rock_update` / `ninety_rock_delete` / `ninety_rock_milestones` | Rock CRUD + its milestones |
 | `ninety_milestone_get` / `ninety_milestone_create` / `ninety_milestone_update` | Milestones on Rocks |
 | `ninety_kpis_query` | List/filter Scorecard Measurables (KPIs) and their metadata |
-| `ninety_put_score` | Create/overwrite a Measurable score for a period |
-| `ninety_put_note` | Create/overwrite a Measurable note for a period |
+| `ninety_team_scorecard` | **Read** a team's scorecard: measurables with score values, notes, goals per period |
+| `ninety_get_score` | **Read** one measurable's score for the period containing a date |
+| `ninety_put_score` / `ninety_put_note` | Create/overwrite a Measurable score / note for a period |
+| `ninety_update_score` | Patch score, note, and/or per-period goal override in one call (null clears) |
 | `ninety_delete_score` / `ninety_delete_note` | Remove a score/note for a period |
+| `ninety_meeting_next` / `ninety_meetings` / `ninety_meeting_get` | A team's next meeting; past meetings with ratings; one meeting with notes |
+| `ninety_vto` | A team's Vision/Traction Organizer (plus the leadership team's shared sections) |
+| `ninety_accountability_chart` | Every Seat, its responsibilities, and who holds it |
+| `ninety_headlines` / `ninety_headline_create` | List / create Headlines and Cascading Messages |
 | `ninety_request` | Raw authenticated request against any `/v1/...` endpoint (escape hatch) |
+
+The API reference this connector was built against is checked in at
+[`openapi/swagger.json`](openapi/swagger.json); the live version is at
+`GET /v1/swagger.json`.
 
 Every call retries automatically on `429 Too Many Requests` (respecting
 `Retry-After`, exponential backoff otherwise) and on transient 5xx errors, so
@@ -90,17 +102,14 @@ batch score writes no longer need manual pacing.
 
 These are constraints of Ninety's public API (v1), not of this connector:
 
-- **Scorecard values cannot be read.** `ninety_kpis_query` returns Measurable
-  metadata (including `lastScoreUpdatedAt`, `isSmart`, `isUsedInFormula`) but
-  not score values; scores are write/overwrite/delete only. If Ninety ships a
-  score-read endpoint later, `ninety_request` can call it immediately.
 - **Never write scores to formula (`isSmart`) Measurables** — they compute
   from other Measurables. Formula definitions can't be edited via the API.
-- **Milestones** have no delete and no list endpoint (they come embedded in
-  each Rock).
-- **Users** can only be fetched by Id — there is no list endpoint.
+- **Milestones** have no delete endpoint.
+- **Company-wide listings** (`*_company`) return 403 for anyone who is not a
+  company Owner or Admin.
 - **Tokens expire** (lifespan chosen at creation). On 401, generate a new
-  token and re-run `node dist/index.js auth`.
+  token and re-run `node dist/index.js auth` (or update the token field in
+  the extension's settings).
 - `GET /v1/swagger.json` (via `ninety_request`) returns the live OpenAPI spec
   if you want Claude to discover endpoints added after this connector was
   built.

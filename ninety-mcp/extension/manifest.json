@@ -2,9 +2,9 @@
   "manifest_version": "0.2",
   "name": "ninety",
   "display_name": "Ninety.io",
-  "version": "0.1.0",
-  "description": "Connect Claude to Ninety.io: To-Dos, Rocks, Milestones, Issues, Scorecard, Teams, and Users.",
-  "long_description": "Full coverage of Ninety's public API (api.public.ninety.io): create, read, update, and delete To-Dos, Issues, Rocks, and Milestones; query Scorecard Measurables and write scores and notes; list Teams and look up Users. Authenticates with your Ninety Personal Access Token (User Settings → Developer Settings in Ninety). Automatic retry on rate limits.",
+  "version": "0.2.0",
+  "description": "Connect Claude to Ninety.io: To-Dos, Rocks, Issues, Scorecard, Meetings, Headlines, V/TO, and more.",
+  "long_description": "Full coverage of Ninety's public API (api.public.ninety.io): create, read, update, and delete To-Dos, Issues, Rocks, and Milestones; read Team Scorecards with score values and write scores, notes, and per-period goals; comments and To-Do linking; Meetings (next and history), Headlines and Cascading Messages, the V/TO, the Accountability Chart, Teams, and Users. Authenticates with your Ninety Personal Access Token (User Settings → Developer Settings in Ninety). Automatic retry on rate limits.",
   "author": {
     "name": "je257"
   },
