@@ -1,16 +1,7 @@
 import { createInterface } from "node:readline/promises";
-import {
-  AppConfig,
-  configDir,
-  loadConfig,
-  loadStoredDomain,
-  loadTokens,
-  resolveDomain,
-  saveConfig,
-  saveTokens,
-} from "./config.js";
+import { AppConfig, configDir, hasStoredDomain, loadConfig, loadTokens, resolveDomain, saveConfig, saveTokens } from "./config.js";
 import { GarminClient } from "./garmin.js";
-import { GarminAuthError, domainLabel, fetchOAuthConsumer, login } from "./sso.js";
+import { GarminAuthError, domainLabel, login } from "./sso.js";
 
 function ask(question: string): Promise<string> {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -68,26 +59,12 @@ function askHidden(question: string): Promise<string> {
 }
 
 async function resolveAppConfig(): Promise<AppConfig> {
-  const existing = loadConfig();
-  const domainAnswer =
-    process.env.GARMIN_DOMAIN ??
-    (existing?.domain ??
-      loadStoredDomain() ??
-      (await ask("Garmin region [global/china] (global): ")));
-  const domain = resolveDomain(domainAnswer);
-
-  if (existing && existing.domain === domain) return existing;
-  if (existing) {
-    const config = { ...existing, domain };
-    saveConfig(config);
-    return config;
-  }
-
-  console.log("Fetching the Garmin Connect app credentials this connector signs in with...");
-  const consumer = await fetchOAuthConsumer();
-  const config: AppConfig = { domain, ...consumer };
-  saveConfig(config);
-  return config;
+  const config = loadConfig();
+  if (process.env.GARMIN_DOMAIN || hasStoredDomain()) return config;
+  const answer = await ask("Garmin region [global/china] (global): ");
+  const resolved = { ...config, domain: resolveDomain(answer) };
+  saveConfig(resolved);
+  return resolved;
 }
 
 export async function runAuthFlow(): Promise<void> {
@@ -100,29 +77,36 @@ export async function runAuthFlow(): Promise<void> {
     const hint = previous?.email ? ` (${previous.email})` : "";
     email = (await ask(`Garmin Connect email${hint}: `)) || previous?.email || "";
   }
-  if (!email) throw new GarminAuthError("An email address is required.");
+  if (!email) throw new GarminAuthError("An email address is required.", "credentials");
   const password = process.env.GARMIN_PASSWORD ?? (await askHidden("Garmin Connect password (hidden): "));
-  if (!password) throw new GarminAuthError("A password is required.");
+  if (!password) throw new GarminAuthError("A password is required.", "credentials");
 
   console.log("\nSigning in to Garmin Connect...");
-  const { oauth1, oauth2 } = await login(config, email, password, async () => {
-    console.log("\nYour account uses multi-factor authentication.");
-    return ask("Enter the 6-digit code from your email/authenticator: ");
+  const auth = await login(config, email, password, {
+    log: (message) => console.log(`  ${message}`),
+    promptMfa: async (method) => {
+      const where = method === "sms" ? "your phone" : method === "email" ? "your email" : "your authenticator app";
+      console.log(`\nYour account uses two-step verification. Garmin sent a code to ${where}.`);
+      return ask("Enter the verification code: ");
+    },
   });
 
-  saveTokens({ domain: config.domain, email, oauth1, oauth2, createdAt: Date.now() });
-  console.log("Signed in. Loading your profile...");
+  saveTokens({ domain: config.domain, email, auth, createdAt: Date.now() });
+  console.log("\nSigned in. Loading your profile...");
 
   const profile = await GarminClient.load().profile();
   console.log(`\nConnected to Garmin Connect as ${profile.fullName ?? profile.userName ?? email}.`);
   console.log(`Tokens saved to ${configDir} (owner read/write only). Your password was not stored.`);
-  console.log("The sign-in stays valid for about a year; the MCP server is ready to use.");
+  console.log(
+    auth.method === "di"
+      ? "The sign-in renews itself automatically; you only need to sign in again if Garmin revokes it."
+      : "The sign-in stays valid for about a year; the MCP server is ready to use.",
+  );
 }
 
 export function printStatus(): void {
-  const config = loadConfig();
   const tokens = loadTokens();
-  if (!config || !tokens) {
+  if (!tokens) {
     console.log("Not connected. Run `node dist/index.js auth` (from the garmin-mcp folder) to sign in.");
     return;
   }
@@ -132,8 +116,14 @@ export function printStatus(): void {
     console.log(`Profile:       ${tokens.profile.fullName ?? tokens.profile.userName ?? "?"} (${tokens.profile.displayName})`);
   }
   console.log(`Signed in:     ${new Date(tokens.createdAt).toISOString()}`);
-  console.log(`Access token:  expires ${new Date(tokens.oauth2.expires_at * 1000).toISOString()} (auto-renews)`);
-  const mfaExpiry = Number(tokens.oauth1.mfa_expiration_timestamp);
-  if (mfaExpiry) console.log(`Sign-in valid: until ${new Date(mfaExpiry * 1000).toISOString()}`);
-  else console.log(`Sign-in valid: roughly one year from sign-in`);
+  const auth = tokens.auth;
+  if (auth.method === "di") {
+    console.log(`Token method:  DI bearer token (refreshes automatically${auth.di.refreshToken ? "" : "; no refresh token stored"})`);
+    if (auth.di.expiresAt) console.log(`Access token:  expires ${new Date(auth.di.expiresAt * 1000).toISOString()}`);
+  } else {
+    console.log(`Token method:  OAuth1 (garth-style)`);
+    console.log(`Access token:  expires ${new Date(auth.oauth2.expires_at * 1000).toISOString()} (auto-renews)`);
+    const mfaExpiry = Number(auth.oauth1.mfa_expiration_timestamp);
+    console.log(`Sign-in valid: ${mfaExpiry ? `until ${new Date(mfaExpiry * 1000).toISOString()}` : "roughly one year from sign-in"}`);
+  }
 }

@@ -9,12 +9,11 @@ import {
   loadTokens,
   saveTokens,
 } from "./config.js";
-import { exchangeForOAuth2 } from "./sso.js";
+import { GarminAuthError, apiHeaders, exchangeForOAuth2, fetchOAuthConsumer, refreshDiToken } from "./sso.js";
 import { extractZip } from "./zip.js";
 
 export class GarminError extends Error {}
 
-const UA_API = "GCM-iOS-5.7.2.1";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export type Query = Record<string, string | number | boolean | undefined>;
@@ -55,7 +54,7 @@ export class GarminClient {
   static load(): GarminClient {
     const config = loadConfig();
     const tokens = loadTokens();
-    if (!config || !tokens) throw new GarminError(NOT_CONNECTED);
+    if (!tokens) throw new GarminError(NOT_CONNECTED);
     return new GarminClient({ ...config, domain: tokens.domain ?? config.domain }, tokens);
   }
 
@@ -69,23 +68,39 @@ export class GarminClient {
 
   // ---------------------------------------------------------------- auth
 
-  private async refreshOAuth2(): Promise<void> {
-    const mfaExpiry = Number(this.tokens.oauth1.mfa_expiration_timestamp);
-    if (mfaExpiry && Date.now() / 1000 > mfaExpiry) {
-      throw new GarminError(
-        "The Garmin sign-in has expired (its MFA token lapsed). Run `node dist/index.js auth` from the garmin-mcp folder to sign in again.",
-      );
-    }
+  /** Obtains a fresh access token (DI refresh, or OAuth1 re-exchange). */
+  private async refreshAuth(): Promise<void> {
+    const auth = this.tokens.auth;
     try {
-      this.tokens = { ...this.tokens, oauth2: await exchangeForOAuth2(this.config, this.tokens.oauth1) };
+      if (auth.method === "di") {
+        this.tokens = { ...this.tokens, auth: { method: "di", di: await refreshDiToken(this.config.domain, auth.di) } };
+      } else {
+        const mfaExpiry = Number(auth.oauth1.mfa_expiration_timestamp);
+        if (mfaExpiry && Date.now() / 1000 > mfaExpiry) {
+          throw new GarminError(
+            "The Garmin sign-in has expired (its MFA token lapsed). Run `node dist/index.js auth` from the garmin-mcp folder to sign in again.",
+          );
+        }
+        let { consumerKey, consumerSecret } = this.config;
+        if (!consumerKey || !consumerSecret) ({ consumerKey, consumerSecret } = await fetchOAuthConsumer());
+        const oauth2 = await exchangeForOAuth2({ domain: this.config.domain, consumerKey, consumerSecret }, auth.oauth1);
+        this.tokens = { ...this.tokens, auth: { ...auth, oauth2 } };
+      }
     } catch (error) {
-      throw new GarminError(error instanceof Error ? error.message : String(error));
+      if (error instanceof GarminError) throw error;
+      throw new GarminError(error instanceof GarminAuthError ? error.message : `Could not refresh the Garmin sign-in: ${error instanceof Error ? error.message : String(error)}`);
     }
     saveTokens(this.tokens);
   }
 
   private async ensureAccessToken(): Promise<void> {
-    if (Date.now() / 1000 > this.tokens.oauth2.expires_at - 60) await this.refreshOAuth2();
+    const auth = this.tokens.auth;
+    const now = Date.now() / 1000;
+    if (auth.method === "di") {
+      if (auth.di.expiresAt && now > auth.di.expiresAt - 900) await this.refreshAuth();
+    } else if (now > auth.oauth2.expires_at - 60) {
+      await this.refreshAuth();
+    }
   }
 
   // ------------------------------------------------------------ requests
@@ -105,16 +120,13 @@ export class GarminClient {
   private async fetchRaw(
     method: string,
     path: string,
-    options: { query?: Query; body?: unknown; form?: FormData } = {},
+    options: { query?: Query; body?: unknown; form?: FormData; accept?: string } = {},
   ): Promise<Response> {
     await this.ensureAccessToken();
     const url = this.buildUrl(path, options.query);
     const doFetch = () => {
-      const headers: Record<string, string> = {
-        Authorization: `Bearer ${this.tokens.oauth2.access_token}`,
-        "User-Agent": UA_API,
-        Accept: "application/json, text/plain, */*",
-      };
+      const headers = apiHeaders(this.tokens.auth);
+      if (options.accept) headers.Accept = options.accept;
       if (this.config.domain === "garmin.cn") headers["di-backend"] = "connectapi.garmin.cn";
       let body: BodyInit | undefined;
       if (options.form) body = options.form;
@@ -127,7 +139,7 @@ export class GarminClient {
     let res = await doFetch();
     if (res.status === 401) {
       await res.arrayBuffer();
-      await this.refreshOAuth2();
+      await this.refreshAuth();
       res = await doFetch();
     }
     return res;
@@ -164,7 +176,7 @@ export class GarminClient {
 
   /** Binary download; returns the raw bytes plus the response content type. */
   async download(path: string, query?: Query): Promise<{ bytes: Buffer; contentType: string }> {
-    const res = await this.fetchRaw("GET", path, { query });
+    const res = await this.fetchRaw("GET", path, { query, accept: "*/*" });
     if (!res.ok) {
       const text = await res.text();
       throw new GarminError(`Garmin download failed (${res.status} ${res.statusText}) for ${path}: ${text.slice(0, 500)}`);

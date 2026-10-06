@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { loadConfig, loadTokens } from "./config.js";
+import { loadTokens } from "./config.js";
 import { GarminClient, GarminError, assertDate, summarizeActivity, todayLocal } from "./garmin.js";
 import { GarminAuthError, domainLabel } from "./sso.js";
 
@@ -68,28 +68,32 @@ export async function startServer(): Promise<void> {
     "garmin_auth_status",
     {
       title: "Garmin connection status",
-      description: "Show whether a Garmin Connect account is signed in, which account, and when the sign-in expires.",
+      description: "Show whether a Garmin Connect account is signed in, which account, and how the sign-in is kept alive.",
       annotations: { readOnlyHint: true },
     },
     () =>
       run(async () => {
-        const config = loadConfig();
         const tokens = loadTokens();
-        if (!config || !tokens) {
+        if (!tokens) {
           return {
             connected: false,
             reason: "In a terminal, run `node dist/index.js auth` from the project's garmin-mcp folder to sign in.",
           };
         }
-        const mfaExpiry = Number(tokens.oauth1.mfa_expiration_timestamp);
+        const auth = tokens.auth;
         return {
           connected: true,
           region: domainLabel(tokens.domain),
           email: tokens.email,
           profile: tokens.profile,
           signedInAt: new Date(tokens.createdAt).toISOString(),
-          accessTokenExpiresAt: new Date(tokens.oauth2.expires_at * 1000).toISOString(),
-          signInValidUntil: mfaExpiry ? new Date(mfaExpiry * 1000).toISOString() : "about one year after sign-in",
+          tokenMethod: auth.method === "di" ? "DI bearer token (auto-refreshes)" : "OAuth1 token (auto-renews for about a year)",
+          accessTokenExpiresAt:
+            auth.method === "di"
+              ? auth.di.expiresAt
+                ? new Date(auth.di.expiresAt * 1000).toISOString()
+                : "unknown"
+              : new Date(auth.oauth2.expires_at * 1000).toISOString(),
         };
       }),
   );

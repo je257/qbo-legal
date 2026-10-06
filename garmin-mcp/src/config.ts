@@ -7,12 +7,24 @@ export type GarminDomain = "garmin.com" | "garmin.cn";
 
 export interface AppConfig {
   domain: GarminDomain;
-  /** OAuth1 consumer key/secret used by the Garmin Connect mobile app. */
-  consumerKey: string;
-  consumerSecret: string;
+  /**
+   * OAuth1 consumer key/secret of the Garmin Connect mobile app. Only needed
+   * for the fallback token exchange; fetched and cached on first use.
+   */
+  consumerKey?: string;
+  consumerSecret?: string;
 }
 
-/** Long-lived (about a year) OAuth1 token returned by Garmin SSO. */
+/** Garmin "DI" OAuth2 bearer token (primary method; refreshes indefinitely). */
+export interface DiToken {
+  accessToken: string;
+  refreshToken?: string;
+  clientId: string;
+  /** Unix seconds, from the JWT's exp claim. */
+  expiresAt?: number;
+}
+
+/** Long-lived (about a year) OAuth1 token (fallback method). */
 export interface OAuth1Token {
   oauth_token: string;
   oauth_token_secret: string;
@@ -20,7 +32,7 @@ export interface OAuth1Token {
   mfa_expiration_timestamp?: string;
 }
 
-/** Short-lived (about an hour) bearer token used for connectapi calls. */
+/** Short-lived bearer token derived from the OAuth1 token (fallback method). */
 export interface OAuth2Token {
   access_token: string;
   refresh_token?: string;
@@ -33,8 +45,12 @@ export interface OAuth2Token {
   refresh_token_expires_at?: number;
 }
 
+export type AuthTokens =
+  | { method: "di"; di: DiToken }
+  | { method: "oauth1"; oauth1: OAuth1Token; oauth2: OAuth2Token };
+
 export interface Profile {
-  /** The UUID-like identifier Garmin uses in many API paths. */
+  /** The identifier Garmin uses in many API paths. */
   displayName: string;
   userName?: string;
   fullName?: string;
@@ -45,8 +61,7 @@ export interface Profile {
 export interface TokenSet {
   domain: GarminDomain;
   email?: string;
-  oauth1: OAuth1Token;
-  oauth2: OAuth2Token;
+  auth: AuthTokens;
   profile?: Profile;
   createdAt: number;
 }
@@ -73,26 +88,18 @@ export function resolveDomain(value: string | undefined): GarminDomain {
   return "garmin.com";
 }
 
-/**
- * Loads the app configuration. Environment variables win over the stored
- * file. Returns undefined when the OAuth consumer credentials are not yet
- * known (they are fetched on the first `auth` run).
- */
-export function loadConfig(): AppConfig | undefined {
+/** Loads the app configuration. Environment variables win over the stored file. */
+export function loadConfig(): AppConfig {
   const stored = readJson<Partial<AppConfig>>(configPath) ?? {};
-  const consumerKey = process.env.GARMIN_OAUTH_CONSUMER_KEY ?? stored.consumerKey;
-  const consumerSecret = process.env.GARMIN_OAUTH_CONSUMER_SECRET ?? stored.consumerSecret;
-  if (!consumerKey || !consumerSecret) return undefined;
   return {
     domain: resolveDomain(process.env.GARMIN_DOMAIN ?? stored.domain),
-    consumerKey,
-    consumerSecret,
+    consumerKey: process.env.GARMIN_OAUTH_CONSUMER_KEY ?? stored.consumerKey,
+    consumerSecret: process.env.GARMIN_OAUTH_CONSUMER_SECRET ?? stored.consumerSecret,
   };
 }
 
-export function loadStoredDomain(): GarminDomain | undefined {
-  const stored = readJson<Partial<AppConfig>>(configPath);
-  return stored?.domain ? resolveDomain(stored.domain) : undefined;
+export function hasStoredDomain(): boolean {
+  return Boolean(readJson<Partial<AppConfig>>(configPath)?.domain);
 }
 
 export function saveConfig(config: AppConfig): void {
@@ -100,7 +107,9 @@ export function saveConfig(config: AppConfig): void {
 }
 
 export function loadTokens(): TokenSet | undefined {
-  return readJson<TokenSet>(tokenPath);
+  const tokens = readJson<Partial<TokenSet>>(tokenPath);
+  if (!tokens?.auth?.method) return undefined;
+  return tokens as TokenSet;
 }
 
 export function saveTokens(tokens: TokenSet): void {

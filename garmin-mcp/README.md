@@ -16,19 +16,32 @@ file permissions). Nothing is hosted anywhere.
 
 Garmin's official APIs are not an option for an individual: the Health API
 is for approved businesses and only pushes summaries to a server. So this
-connector signs in the same way the Garmin Connect mobile app does — Garmin
-SSO with your email and password (and MFA code if enabled), then an OAuth1 →
-OAuth2 token exchange — and calls the same `connectapi.garmin.com` endpoints
-the app uses. This is the approach used by the open-source
-[`garth`](https://github.com/matin/garth),
-[`python-garminconnect`](https://github.com/cyberjunky/python-garminconnect) and
-[GarminDB](https://github.com/tcgoetz/GarminDB) projects, ported to Node with
-no extra dependencies.
+connector signs in the same way the Garmin Connect mobile app does and calls
+the same `connectapi.garmin.com` endpoints the app uses. The flow is a port
+of the one in the actively maintained
+[`python-garminconnect`](https://github.com/cyberjunky/python-garminconnect)
+library (0.3.x), with [`garth`](https://github.com/matin/garth)'s older
+token exchange kept as a fallback:
+
+1. **Service ticket.** Your email and password (and MFA code, if your
+   account uses one) go to Garmin SSO's mobile-app JSON login. If Garmin
+   rate-limits or bot-challenges that, the connector falls back, in turn, to
+   the Android client id, the embedded sign-in widget, and the web portal
+   login, each of which sits in a different rate-limit bucket.
+2. **Tokens.** The ticket is exchanged at `diauth.garmin.com` for a "DI"
+   OAuth2 bearer token plus a refresh token, exactly as the current Garmin
+   Connect app does. If that exchange is refused, the connector falls back
+   to garth's OAuth1 exchange (which needs the mobile app's OAuth consumer
+   key, fetched once from the location garth publishes it and cached).
+3. **Check.** The token is only accepted once `connectapi` has answered a
+   real request with it.
 
 Consequences worth knowing:
 
-- Your password is used once, to sign in, and is **not stored**. The resulting
-  sign-in token lasts about a year; the hourly access token renews itself.
+- Your password is used once, to sign in, and is **not stored**. The DI
+  token refreshes itself indefinitely; you only sign in again if Garmin
+  revokes it (for example after a password change). With the OAuth1
+  fallback the sign-in lasts about a year.
 - Garmin can change these endpoints at any time. The `garmin_api_request`
   tool exists so new or renamed endpoints work without a code change.
 - Garmin's terms don't formally sanction automated access to Connect. This is
@@ -49,9 +62,9 @@ node dist/index.js setup
 
 - **`auth`** — asks for your region (Enter for global), Garmin Connect email
   and password (hidden), and an MFA code if your account uses one. Tokens
-  land in `~/.garmin-mcp/tokens.json` (mode 600). The OAuth consumer key the
-  Garmin app uses is fetched once from the same public location `garth`
-  uses and cached in `~/.garmin-mcp/config.json`.
+  land in `~/.garmin-mcp/tokens.json` (mode 600). Sign-in normally takes a
+  few seconds; if Garmin blocks the fast methods it can take up to half a
+  minute while the fallbacks pace themselves to look like a browser.
 - **`install`** — registers the server in Claude Desktop's
   `claude_desktop_config.json` (existing config is backed up first), then
   prints the equivalent `claude mcp add` one-liner for Claude Code.
@@ -132,8 +145,10 @@ A few of the many services behind `https://connectapi.garmin.com`:
 
 ## Maintenance
 
-- **Sign in again** (after ~1 year, a password change, or if tools start
-  returning 401/403): `node dist/index.js auth`.
+- **Sign in again** (after a password change, or if tools start reporting
+  that Garmin refused to refresh the token): `node dist/index.js auth`.
+- **"Garmin rate-limited every sign-in method"**: wait an hour or so (or use
+  another network) and run `auth` again. Repeated attempts make it worse.
 - **Revoke access:** change your Garmin password (invalidates the token)
   and/or delete `~/.garmin-mcp/`.
 - **Rebuild after changing the source:** `cd garmin-mcp && npm run build`.

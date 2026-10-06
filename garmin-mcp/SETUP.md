@@ -94,9 +94,12 @@ This walks you through everything:
    sends a 6-digit code to your email or phone. Type it and press Enter.
 4. It signs in and then adds itself to Claude Desktop automatically. You
    should see `Added the "garmin" Garmin Connect connector to Claude Desktop`.
+   (Sign-in usually takes a few seconds. If you see "Waiting 15s before
+   submitting", that's normal: Garmin blocked the quick method and the
+   connector is pacing itself like a web browser would.)
 
 Your password is used only to sign in and is not saved anywhere. The
-sign-in stays valid for about a year.
+sign-in renews itself automatically from then on.
 
 ## Step 5 — Restart Claude and try it
 
@@ -130,13 +133,18 @@ rate this month to last month", "what's my training readiness?", or
 - **"Garmin sign-in did not succeed"** — the email or password was
   mistyped, or the two-step code was wrong/expired. Run
   `node dist/index.js auth` and try again.
-- **"Garmin rate-limited the sign-in attempt (HTTP 429)"** — too many
-  sign-in attempts. Wait an hour and run `node dist/index.js auth` again.
+- **"Garmin rate-limited every sign-in method"** — too many sign-in
+  attempts from your network. Wait an hour (don't keep retrying) and run
+  `node dist/index.js auth` again.
+- **"Every sign-in method failed"** — Garmin changed something, or your
+  network is being blocked. Copy the whole message (it never contains your
+  password) and ask for help with it.
 - **Claude says it can't see any garmin tools** — make sure you fully quit
   and reopened Claude Desktop (closing the window is not enough).
-- **It worked for months, then stopped** — the sign-in expires after about
-  a year, or after you change your Garmin password. In the `garmin-mcp`
-  folder, run `node dist/index.js auth` to sign in again.
+- **It worked for months, then stopped** — Garmin revoked the sign-in,
+  which happens after you change your Garmin password or sign out of all
+  devices. In the `garmin-mcp` folder, run `node dist/index.js auth` to
+  sign in again.
 - **You moved or renamed the project folder** — run
   `node dist/index.js install` from the folder's new location.
 - **See the saved connection details** — run `node dist/index.js status`.
