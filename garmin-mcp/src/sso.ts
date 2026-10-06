@@ -296,10 +296,14 @@ function readJsonLoginResponse(
 
 /** Completes MFA for the JSON (mobile / portal) flows. */
 async function verifyMfaJson(ctx: JsonLoginContext, mfaMethod: string, opts: LoginOptions): Promise<string> {
+  // The other flow's verify endpoint sits in a different rate-limit bucket; its
+  // params must name that flow's own registered CAS service (python-garminconnect
+  // _complete_mfa), not a transform of ours.
+  const apex = new URL(ctx.sso).hostname.replace(/^sso\./, "");
   const alt: Pick<JsonLoginContext, "flowPath" | "params"> =
     ctx.flowPath === "mobile"
-      ? { flowPath: "portal", params: { clientId: PORTAL_CLIENT_ID, locale: "en-US", service: `https://connect.${new URL(ctx.sso).hostname.replace(/^sso\./, "")}/app` } }
-      : { flowPath: "mobile", params: { clientId: "GCM_IOS_DARK", locale: "en-US", service: ctx.serviceUrl.replace(/\/gcm\/\w+$/, "/gcm/ios").replace(/^https:\/\/connect\./, "https://mobile.integration.") } };
+      ? { flowPath: "portal", params: { clientId: PORTAL_CLIENT_ID, locale: "en-US", service: `https://connect.${apex}/app` } }
+      : { flowPath: "mobile", params: { clientId: "GCM_IOS_DARK", locale: "en-US", service: `https://mobile.integration.${apex}/gcm/ios` } };
 
   for (let attempt = 1; attempt <= MFA_ATTEMPTS; attempt++) {
     const code = (await opts.promptMfa(mfaMethod)).trim();
@@ -470,11 +474,12 @@ async function widgetLogin(domain: GarminDomain, email: string, password: string
 
   const mfaVars = parseWidgetMfaVars(page.text);
   const mfaMethod = (mfaVars.mfaMethod ?? "").toLowerCase();
+  const signinPageUrl = page.url;
   if (lower.includes("mfa") || (lower.includes("authentication application") && mfaMethod)) {
     if ((mfaMethod === "email" || mfaMethod === "sms") && !mfaVars.codeSentTo) {
       const sent = await session.request("POST", withParams(`${ssoBase}/verifyMFA/mfaCode`, { clientId: mfaVars.clientId ?? "" }), {
         headers: { ...headers, Accept: JSON_ACCEPT },
-        referer: true,
+        referer: signinPageUrl,
         json: { customerGuid: mfaVars.customerGuid ?? "", mfaMethod: mfaVars.mfaMethod ?? "", locale: mfaVars.locale ?? "" },
       });
       if (sent.status === 429) throw new GarminAuthError("Widget MFA code request: rate-limited (HTTP 429).", "rate-limit");
@@ -487,7 +492,7 @@ async function widgetLogin(domain: GarminDomain, email: string, password: string
     if (!code) throw new GarminAuthError("No MFA code entered.", "mfa");
     page = await session.request("POST", withParams(`${ssoBase}/verifyMFA/loginEnterMfaCode`, signinParams), {
       headers,
-      referer: true,
+      referer: signinPageUrl,
       form: { "mfa-code": code, embed: "true", _csrf: mfaCsrf, fromPage: "setupEnterMfaCode" },
     });
     if (page.status === 429) throw new GarminAuthError("Widget MFA verify: rate-limited (HTTP 429).", "rate-limit");
@@ -678,17 +683,26 @@ async function consumerConfig(config: AppConfig): Promise<ConsumerConfig> {
 
 /** Turns a service ticket into API tokens: DI first, garth's OAuth1 path as fallback. */
 async function establishSession(config: AppConfig, ticket: ServiceTicket, opts: LoginOptions): Promise<AuthTokens> {
+  let diError: GarminAuthError;
   try {
     return { method: "di", di: await exchangeTicketForDi(config.domain, ticket) };
   } catch (error) {
-    const err = toAuthError(error);
-    if (err.kind === "rate-limit") throw err;
-    opts.log?.(`Primary token exchange failed (${err.message}); trying the OAuth1 exchange instead...`);
+    // Like python-garminconnect, fall back on any DI failure, 429 included:
+    // diauth rate-limiting does not consume the CAS ticket, and connectapi's
+    // oauth-service is a separate host with its own limits.
+    diError = toAuthError(error);
+    opts.log?.(`Primary token exchange failed (${diError.message}); trying the OAuth1 exchange instead...`);
   }
-  const cc = await consumerConfig(config);
-  const oauth1 = await getOAuth1Token(cc, ticket);
-  const oauth2 = await exchangeForOAuth2(cc, oauth1, { login: true });
-  return { method: "oauth1", oauth1, oauth2 };
+  try {
+    const cc = await consumerConfig(config);
+    const oauth1 = await getOAuth1Token(cc, ticket);
+    const oauth2 = await exchangeForOAuth2(cc, oauth1, { login: true });
+    return { method: "oauth1", oauth1, oauth2 };
+  } catch (error) {
+    const fallbackError = toAuthError(error);
+    const kind = diError.kind === "rate-limit" || fallbackError.kind === "rate-limit" ? "rate-limit" : fallbackError.kind;
+    throw new GarminAuthError(`${diError.message} Fallback also failed: ${fallbackError.message}`, kind);
+  }
 }
 
 /** Checks that connectapi accepts the token. Only a definite 401/403 counts as rejection. */

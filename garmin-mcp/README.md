@@ -99,32 +99,38 @@ fetched consumer credentials), `GARMIN_MCP_DIR` (config directory).
 
 ## Tools exposed to Claude
 
-Read-only unless noted. Dates are `YYYY-MM-DD` and default to today.
+Read-only unless noted. Dates are `YYYY-MM-DD` and default to today. Every
+endpoint path, parameter and payload was cross-checked against
+`python-garminconnect` 0.3.17 and `garth` 0.8.0 (the connector's `npm test`
+pins the request shapes), but none of it has been exercised against a live
+account from this repository yet.
 
 | Tool | What it does |
 | --- | --- |
 | `garmin_auth_status` | Signed-in account, region, token expiry |
-| `garmin_profile` | Social profile + user settings (birth date, height, weight, VO2 max, HR/power zones, goals, units) |
+| `garmin_profile` | Social profile, user settings (birth date, height, weight, VO2 max, goals, units), profile settings, heart-rate zones and power zones per sport |
 | `garmin_daily_summary` | One day's roll-up: steps, distance, floors, calories, intensity minutes, HR, stress, Body Battery, sleep seconds, SpO2, respiration |
-| `garmin_wellness` | Per-day detail by `metric`: sleep, heartRate, stress, bodyBattery, hrv, spo2, respiration, intensityMinutes, floors, hydration, stepsChart, weighIns, menstrualCycle, pregnancy, dailyEvents |
-| `garmin_trend` | Day-by-day series over a range by `metric`: steps, stress, intensityMinutes, hydration, sleepScore, hrv, bodyBattery, restingHeartRate, vo2max, racePredictions, enduranceScore, hillScore, weight, bloodPressure, menstrualCalendar (long ranges auto-chunked) |
-| `garmin_training` | Training Readiness, Training Status/load, VO2 max, race predictions, endurance score, hill score, fitness age |
-| `garmin_activities` | List/search activities by date, type, or name (compact by default) |
+| `garmin_wellness` | Per-day detail by `metric`: sleep, heartRate, stress, bodyBattery, hrv, spo2, respiration, intensityMinutes, floors, hydration, stepsChart, activitiesForDate, dailyEvents, weighIns, nutrition (food log / meals / settings), lifestyleLog, menstrual (day, summary, last confirmed, reports), pregnancy |
+| `garmin_trend` | Series over a range by `metric`: steps / stepsWeekly, stress / stressWeekly, intensityMinutes / intensityMinutesWeekly, hydration, calories, sleep (nightly summaries with sub-scores), hrv, bodyBattery, restingHeartRate, vo2max, racePredictions, enduranceScore, hillScore, runningTolerance, lactateThreshold, ftp, trainingLoad (per activity), weight, bloodPressure, menstrualCalendar. Garmin's per-request caps are chunked for you |
+| `garmin_training` | Training Readiness, aggregated and daily Training Status, four-week load balance, VO2 max, race predictions, endurance/hill score, fitness age, latest lactate threshold and FTP, HR and power zones, training plans |
+| `garmin_activities` | List/search activities by date, type/sub-type, or name, oldest- or newest-first, or just the total count (compact by default) |
 | `garmin_activity_types` | Garmin's activity type keys |
 | `garmin_activity` | One activity by `section`: summary, details (time series + GPS), splits/laps, typedSplits, splitSummaries, weather, hrZones, powerZones, exerciseSets, gear |
 | `garmin_download_activity` | Save the original FIT (unzipped), or TCX/GPX/KML/CSV, to disk |
+| `garmin_download_health_snapshot` | Save a day's Health Snapshot FIT files to disk |
 | `garmin_activity_stats` | Totals (distance, duration, calories, elevation…) over a period, by activity type |
 | `garmin_personal_records` | All PRs |
-| `garmin_badges` | Earned/available badges and challenges |
+| `garmin_badges` | Earned/available badges (incl. exclusive) and paged challenges |
 | `garmin_goals` | Active/future/past goals |
 | `garmin_gear` | Gear list, per-gear totals and activities, defaults per activity type |
 | `garmin_devices` | Registered devices, last used, primary training device, full device settings, solar data |
-| `garmin_workouts` | Saved structured workouts, full definition, FIT download |
-| `garmin_log_weight` | *Write:* add a manual weight entry |
+| `garmin_workouts` | Saved structured workouts, full definition, FIT download, the monthly training calendar, scheduled workouts |
+| `garmin_golf` | Scorecards, scorecard detail, shot data, club and player stats |
+| `garmin_log_weight` | *Write:* add a manual weight entry (kg or lbs) |
 | `garmin_log_blood_pressure` | *Write:* add a blood pressure reading |
 | `garmin_log_hydration` | *Write:* add water intake |
 | `garmin_update_activity` | *Write:* rename, describe, or retype an activity |
-| `garmin_api_request` | Any `connectapi.garmin.com` endpoint, any method — the escape hatch (`{displayName}` in the path is filled in) |
+| `garmin_api_request` | Any `connectapi.garmin.com` endpoint, any method, extra headers — the escape hatch (`{displayName}` in the path is filled in; array query values repeat the parameter) |
 
 ### Endpoint cheat-sheet for `garmin_api_request`
 
@@ -135,13 +141,15 @@ A few of the many services behind `https://connectapi.garmin.com`:
 | `usersummary-service` | `/usersummary/daily/{displayName}?calendarDate=…`, `/stats/steps/daily/{start}/{end}` |
 | `wellness-service` | `/wellness/dailySleepData/{displayName}?date=…`, `/wellness/dailyStress/{date}`, `/wellness/dailyHeartRate/{displayName}?date=…`, `/wellness/bodyBattery/reports/daily?startDate=…&endDate=…` |
 | `hrv-service` | `/hrv/{date}`, `/hrv/daily/{start}/{end}` |
-| `metrics-service` | `/metrics/trainingreadiness/{date}`, `/metrics/trainingstatus/aggregated?date=…`, `/metrics/maxmet/daily/{start}/{end}`, `/metrics/racepredictions/latest/{displayName}` |
+| `metrics-service` | `/metrics/trainingreadiness/{date}`, `/metrics/trainingstatus/aggregated/{date}`, `/metrics/trainingloadbalance/latest/{date}`, `/metrics/maxmet/daily/{start}/{end}`, `/metrics/racepredictions/latest/{displayName}` |
+| `sleep-service`, `biometric-service` | `/stats/sleep/daily/{start}/{end}` (28-day max), `/biometric/latestLactateThreshold`, `/heartRateZones`, `/powerZones/sports/all`, `/stats/functionalThresholdPower/range/{start}/{end}?sport=CYCLING&aggregation=daily&aggregationStrategy=LATEST` |
 | `activitylist-service`, `activity-service` | `/activities/search/activities?start=0&limit=20`, `/activity/{id}`, `/activity/{id}/details`, `/activity/{id}/splits` |
 | `download-service` | `/files/activity/{id}` (FIT zip), `/export/gpx/activity/{id}` |
 | `weight-service`, `bloodpressure-service` | `/weight/dateRange?startDate=…&endDate=…`, `/bloodpressure/range/{start}/{end}?includeAll=true` |
-| `device-service`, `gear-service`, `workout-service` | `/deviceregistration/devices`, `/gear/filterGear?userProfilePk=…`, `/workouts?start=0&limit=50` |
+| `device-service`, `gear-service`, `workout-service` | `/deviceregistration/devices`, `/gear/filterGear?userProfilePk={profileId}`, `/workouts?start=0&limit=50`, `/workout/schedule/{id}` |
+| `nutrition-service`, `gcs-golfcommunity`, `trainingplan-service` | `/food/logs/{date}`, `/api/v2/scorecard/summary?per-page=20&start=0`, `/trainingplan/plans` |
 | `personalrecord-service`, `badge-service`, `goal-service` | `/personalrecord/prs/{displayName}`, `/badge/earned`, `/goal/goals?status=active` |
-| `calendar-service` | `/year/2026/month/8` (month is zero-based) |
+| `calendar-service` | `/year/2026/month/8` (month is zero-based; `garmin_workouts` takes a normal month number) |
 
 ## Maintenance
 

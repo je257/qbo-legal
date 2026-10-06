@@ -1,6 +1,6 @@
 {
   "name": "garmin-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server connecting Claude to a Garmin Connect account (full wellness, training, and activity data)",
   "license": "UNLICENSED",
   "private": true,

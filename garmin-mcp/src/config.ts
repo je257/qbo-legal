@@ -115,3 +115,20 @@ export function loadTokens(): TokenSet | undefined {
 export function saveTokens(tokens: TokenSet): void {
   writeJson(tokenPath, tokens);
 }
+
+/**
+ * Garmin returns mfa_expiration_timestamp as a naive datetime string such as
+ * "2027-10-06 12:34:56.789" (garth's recorded responses). Returns epoch
+ * milliseconds, or undefined when absent or unparseable.
+ */
+export function parseMfaExpiry(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+  const v = value.trim();
+  if (/^\d+$/.test(v)) {
+    const n = Number(v);
+    return v.length >= 13 ? n : n * 1000;
+  }
+  const iso = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(v) ? v.replace(" ", "T") + "Z" : v;
+  const ms = Date.parse(iso);
+  return Number.isNaN(ms) ? undefined : ms;
+}

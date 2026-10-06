@@ -1,5 +1,5 @@
 import { createInterface } from "node:readline/promises";
-import { AppConfig, configDir, hasStoredDomain, loadConfig, loadTokens, resolveDomain, saveConfig, saveTokens } from "./config.js";
+import { AppConfig, configDir, hasStoredDomain, loadConfig, loadTokens, parseMfaExpiry, resolveDomain, saveConfig, saveTokens } from "./config.js";
 import { GarminClient } from "./garmin.js";
 import { GarminAuthError, domainLabel, login } from "./sso.js";
 
@@ -123,7 +123,7 @@ export function printStatus(): void {
   } else {
     console.log(`Token method:  OAuth1 (garth-style)`);
     console.log(`Access token:  expires ${new Date(auth.oauth2.expires_at * 1000).toISOString()} (auto-renews)`);
-    const mfaExpiry = Number(auth.oauth1.mfa_expiration_timestamp);
-    console.log(`Sign-in valid: ${mfaExpiry ? `until ${new Date(mfaExpiry * 1000).toISOString()}` : "roughly one year from sign-in"}`);
+    const mfaExpiry = parseMfaExpiry(auth.oauth1.mfa_expiration_timestamp);
+    console.log(`Sign-in valid: ${mfaExpiry !== undefined ? `until ${new Date(mfaExpiry).toISOString()}` : "roughly one year from sign-in"}`);
   }
 }

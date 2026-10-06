@@ -148,6 +148,61 @@ test("every strategy rate-limited yields one clear error", async () => {
   assert.deepEqual(calls.map((c) => c.url.pathname), ["/mobile/api/login", "/mobile/api/login", "/sso/embed", "/portal/sso/en-US/sign-in"]);
 });
 
+test("portal-flow MFA falls back to the mobile verify endpoint with the iOS service", async () => {
+  fx.reset();
+  route((r) => r.url.host === SSO && r.url.pathname === "/mobile/api/login", () => new Response("", { status: 429 }));
+  route(at(SSO, "/sso/embed"), () => new Response("", { status: 429 }));
+  route(at(SSO, "/portal/sso/en-US/sign-in"), () => new Response("<html></html>", { status: 200, headers: [["set-cookie", "P=1; Path=/"]] }));
+  route(at(SSO, "/portal/api/login"), () => json({ responseStatus: { type: "MFA_REQUIRED" }, customerMfaInfo: { mfaLastMethodUsed: "email" } }));
+  const verifyCalls = [];
+  route((r) => r.url.host === SSO && /\/api\/mfa\/verifyCode$/.test(r.url.pathname), (r) => {
+    verifyCalls.push(r);
+    if (r.url.pathname.startsWith("/portal/")) return new Response("", { status: 429 });
+    return json({ responseStatus: { type: "SUCCESSFUL" }, serviceTicketId: "ST-P-cas" });
+  });
+  diOk();
+  okProfile();
+  const auth = await login(config, "me@example.com", "pw", { promptMfa: async () => "111111", log: () => {} });
+  assert.equal(auth.method, "di");
+  assert.deepEqual(verifyCalls.map((r) => r.url.pathname), ["/portal/api/mfa/verifyCode", "/mobile/api/mfa/verifyCode"]);
+  assert.deepEqual(Object.fromEntries(verifyCalls[1].url.searchParams), { clientId: "GCM_IOS_DARK", locale: "en-US", service: "https://mobile.integration.garmin.com/gcm/ios" });
+  assert.match(verifyCalls[1].headers.Cookie, /P=1/);
+  // the ticket is exchanged for the portal flow's own service
+  assert.equal(form(calls.find((c) => c.url.host === DI).body).service_url, "https://connect.garmin.com/app");
+});
+
+test("a rate-limited DI exchange still tries the OAuth1 exchange", async () => {
+  fx.reset();
+  route(at(SSO, "/mobile/api/login"), () => json({ responseStatus: { type: "SUCCESSFUL" }, serviceTicketId: "ST-R-cas" }));
+  route(at(DI, "/di-oauth2-service/oauth/token"), () => new Response("", { status: 429 }));
+  route(at("thegarth.s3.amazonaws.com", "/oauth_consumer.json"), () => json({ consumer_key: "ck", consumer_secret: "cs" }));
+  route(at(API, "/oauth-service/oauth/preauthorized"), () => new Response("oauth_token=ot&oauth_token_secret=os", { status: 200 }));
+  route(at(API, "/oauth-service/oauth/exchange/user/2.0"), () => json({ access_token: "o2", token_type: "Bearer", expires_in: 3600 }));
+  okProfile();
+  const auth = await login(config, "me@example.com", "pw", noMfa);
+  assert.equal(auth.method, "oauth1");
+  assert.equal(calls.filter((c) => c.url.host === DI).length, 1, "stops at the first 429 from diauth");
+});
+
+test("concurrent calls share one token refresh", async () => {
+  fx.reset();
+  writeFileSync(
+    `${home}/tokens.json`,
+    JSON.stringify({ domain: "garmin.com", createdAt: 1, profile: { displayName: "abc" }, auth: { method: "di", di: { accessToken: "old", refreshToken: "refresh-1", clientId: "GARMIN_CONNECT_MOBILE_ANDROID_DI_2025Q2", expiresAt: now - 5 } } }),
+  );
+  let refreshes = 0;
+  route(at(DI, "/di-oauth2-service/oauth/token"), async () => {
+    refreshes++;
+    await new Promise((r) => setTimeout(r, 20));
+    return json({ access_token: jwt({ exp: now + 7200, client_id: "GARMIN_CONNECT_MOBILE_ANDROID_DI_2025Q2" }), refresh_token: "refresh-2" });
+  });
+  route(at(API, "/x"), (r) => json({ auth: r.headers.Authorization }));
+  const [a, b, c] = await Promise.all([GarminClient.load().get("/x"), GarminClient.load().get("/x"), GarminClient.load().get("/x")]);
+  assert.equal(refreshes, 1);
+  assert.equal(a.auth, b.auth);
+  assert.equal(b.auth, c.auth);
+});
+
 test("DI refresh keeps the old refresh token when none is returned", async () => {
   fx.reset();
   route(at(DI, "/di-oauth2-service/oauth/token"), () => json({ access_token: jwt({ exp: now + 7200, client_id: "GARMIN_CONNECT_MOBILE_ANDROID_DI_2025Q2" }) }));

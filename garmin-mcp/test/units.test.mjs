@@ -5,6 +5,7 @@ import { buildZip, importDist } from "./helpers.mjs";
 const { oauth1Header } = await importDist("oauth1.js");
 const { extractZip } = await importDist("zip.js");
 const { extractTitle, extractCsrf, extractTicket, parseWidgetMfaVars, decodeJwtPayload } = await importDist("sso.js");
+const { parseMfaExpiry } = await importDist("config.js");
 
 test("OAuth1 HMAC-SHA1 signature matches Twitter's documented example", () => {
   const url = new URL("https://api.twitter.com/1.1/statuses/update.json?include_entities=true");
@@ -50,4 +51,11 @@ test("JWT payload decoding rejects alg=none", () => {
   assert.deepEqual(decodeJwtPayload(`${b64u({ alg: "RS256" })}.${b64u({ exp: 5, client_id: "x" })}.s`), { exp: 5, client_id: "x" });
   assert.equal(decodeJwtPayload(`${b64u({ alg: "none" })}.${b64u({ exp: 5 })}.`), undefined);
   assert.equal(decodeJwtPayload("garbage"), undefined);
+});
+
+test("mfa_expiration_timestamp is parsed as Garmin's naive datetime string", () => {
+  assert.equal(parseMfaExpiry("2027-10-06 12:34:56.789"), Date.parse("2027-10-06T12:34:56.789Z"));
+  assert.equal(parseMfaExpiry("1800000000"), 1800000000000);
+  assert.equal(parseMfaExpiry(undefined), undefined);
+  assert.equal(parseMfaExpiry("not a date"), undefined);
 });
