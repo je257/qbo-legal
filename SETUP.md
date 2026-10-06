@@ -84,12 +84,6 @@ see `package.json` in the list.
 
 ## Step 5 — Connect it (two commands)
 
-**First, quit Claude Desktop completely** if it's open. Closing the window
-isn't enough: on Windows, right-click the Claude icon in the system tray
-(click the **^** arrow by the clock if it's hidden) and choose **Quit**; on
-Mac, press Cmd+Q. Claude Desktop rewrites its settings file when it quits,
-and that would erase the connector you're about to add.
-
 In that terminal, run this first (it downloads the connector's parts —
 takes a minute):
 
@@ -122,16 +116,20 @@ This walks you through everything:
 3. You land on a page titled "Authorization received" with a **Copy**
    button. Click it, go back to the terminal, paste (right-click pastes
    in PowerShell), and press Enter.
-4. It then adds itself to Claude Desktop automatically. You should see
-   `Added the "qbo" QuickBooks connector to Claude Desktop`. (If it instead
-   says Claude Desktop is running, quit Claude Desktop as described above
-   and press Enter.)
+4. It then adds itself to Claude Desktop's config. You should see
+   `Added the "qbo" QuickBooks connector`. Keep this window open: it also
+   prints the exact text to paste if the next step doesn't show the
+   connector.
 
-## Step 6 — Open Claude and try it
+## Step 6 — Restart Claude and try it
 
-1. Open Claude Desktop. The connector is listed under **Settings →
-   Developer**.
-2. Ask Claude:
+1. Quit Claude Desktop completely and open it again. Closing the window
+   isn't enough: on Windows, right-click the Claude icon in the system tray
+   (click the **^** arrow by the clock if it's hidden) and choose **Quit**;
+   on Mac, press Cmd+Q.
+2. Check **Settings → Developer**. `qbo` should be listed there. If it
+   isn't, see "Claude says it can't see any qbo tools" below.
+3. Ask Claude:
 
    > Use qbo_company_info to show my company profile.
 
@@ -165,20 +163,36 @@ invoices are overdue?"
   Redirect URI in Step 3.4 doesn't match exactly. Fix it and run
   `node dist/index.js setup` again.
 - **Claude says it can't see any qbo tools, and Settings → Developer
-  doesn't list `qbo`** — Claude Desktop was running when you ran setup and
-  overwrote the settings file when it quit. Quit Claude Desktop completely
-  (system tray → Quit, then check Task Manager for any remaining "Claude"
-  entries), run `node dist/index.js install` in the `mcp` folder, and open
-  Claude Desktop again.
+  doesn't list `qbo`** — Claude Desktop didn't pick up the entry setup
+  wrote. Add it through Desktop's own editor, which always works:
+  1. Settings → Developer → **Edit config**; right-click
+     `claude_desktop_config.json` → Open with → Notepad.
+  2. Inside `"mcpServers"`, add this entry (with a comma after the entry
+     before it), using the real location of your `mcp` folder:
+
+     ```json
+     "qbo": {
+       "command": "C:\\Program Files\\nodejs\\node.exe",
+       "args": ["C:\\path\\to\\qbo-legal-main\\mcp\\dist\\index.js"]
+     }
+     ```
+
+     (On Mac the command is `/usr/local/bin/node` or wherever `which node`
+     points, and paths use single forward slashes.) The `install` command
+     prints this block with your exact paths filled in.
+  3. Save, quit Claude Desktop completely, and open it again. If the list
+     goes empty, the file has a stray comma or brace; the printed block
+     and the entries around it must each be separated by exactly one comma.
 - **It worked for months, then stopped** — the QuickBooks connection
   expires after ~100 days of no use. In the `mcp` folder, run
   `node dist/index.js auth` to reconnect.
-- **You moved or renamed the project folder** — quit Claude Desktop, then
-  run `node dist/index.js install` from the folder's new location.
+- **You moved or renamed the project folder** — run
+  `node dist/index.js install` from the folder's new location (or update
+  the path in Edit config), then restart Claude Desktop.
 - **See the saved connection details** (company, when the connection
   expires) — run `node dist/index.js status`.
 
 ## Using Claude Code instead of Claude Desktop?
 
 After Step 5's `setup` finishes, it prints a `claude mcp add qbo ...`
-command — copy and run that one line, and skip Step 6.
+command — copy and run that one line, and skip Step 6's restart.

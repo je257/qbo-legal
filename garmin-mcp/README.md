@@ -66,15 +66,14 @@ node dist/index.js setup
   few seconds; if Garmin blocks the fast methods it can take up to half a
   minute while the fallbacks pace themselves to look like a browser.
 - **`install`** — registers the server in Claude Desktop's
-  `claude_desktop_config.json` (existing config is backed up first), then
-  prints the equivalent `claude mcp add` one-liner for Claude Code. Claude
-  Desktop must be closed while this runs: it rewrites that file from memory
-  when it quits and would erase the new entry, so `install` waits for you
-  to quit it.
+  `claude_desktop_config.json` (existing config is backed up first), prints
+  the entry to paste via Settings → Developer → Edit config in case Desktop
+  doesn't pick up the external write, and prints the equivalent
+  `claude mcp add` one-liner for Claude Code.
 
 Each is also runnable on its own (`node dist/index.js auth` /
 `node dist/index.js install`), and `node dist/index.js status` shows the
-connection. After `install`, open Claude Desktop; the server is listed
+connection. After `install`, restart Claude Desktop; the server is listed
 under Settings → Developer.
 
 Manual registration — **Claude Code:**
