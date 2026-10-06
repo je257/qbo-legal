@@ -67,11 +67,15 @@ node dist/index.js setup
   minute while the fallbacks pace themselves to look like a browser.
 - **`install`** — registers the server in Claude Desktop's
   `claude_desktop_config.json` (existing config is backed up first), then
-  prints the equivalent `claude mcp add` one-liner for Claude Code.
+  prints the equivalent `claude mcp add` one-liner for Claude Code. Claude
+  Desktop must be closed while this runs: it rewrites that file from memory
+  when it quits and would erase the new entry, so `install` waits for you
+  to quit it.
 
 Each is also runnable on its own (`node dist/index.js auth` /
 `node dist/index.js install`), and `node dist/index.js status` shows the
-connection. After `install`, restart Claude Desktop.
+connection. After `install`, open Claude Desktop; the server is listed
+under Settings → Developer.
 
 Manual registration — **Claude Code:**
 

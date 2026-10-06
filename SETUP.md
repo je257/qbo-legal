@@ -84,6 +84,12 @@ see `package.json` in the list.
 
 ## Step 5 — Connect it (two commands)
 
+**First, quit Claude Desktop completely** if it's open. Closing the window
+isn't enough: on Windows, right-click the Claude icon in the system tray
+(click the **^** arrow by the clock if it's hidden) and choose **Quit**; on
+Mac, press Cmd+Q. Claude Desktop rewrites its settings file when it quits,
+and that would erase the connector you're about to add.
+
 In that terminal, run this first (it downloads the connector's parts —
 takes a minute):
 
@@ -117,14 +123,14 @@ This walks you through everything:
    button. Click it, go back to the terminal, paste (right-click pastes
    in PowerShell), and press Enter.
 4. It then adds itself to Claude Desktop automatically. You should see
-   `Added the "qbo" QuickBooks connector to Claude Desktop`.
+   `Added the "qbo" QuickBooks connector to Claude Desktop`. (If it instead
+   says Claude Desktop is running, quit Claude Desktop as described above
+   and press Enter.)
 
-## Step 6 — Restart Claude and try it
+## Step 6 — Open Claude and try it
 
-1. Fully quit Claude Desktop (**Mac:** Cmd+Q. **Windows:** right-click the
-   Claude icon in the system tray → Quit; if you don't see the icon, click
-   the **^** arrow at the right end of the taskbar to show hidden icons)
-   and open it again.
+1. Open Claude Desktop. The connector is listed under **Settings →
+   Developer**.
 2. Ask Claude:
 
    > Use qbo_company_info to show my company profile.
@@ -158,17 +164,21 @@ invoices are overdue?"
 - **Browser shows an Intuit error instead of the sign-in page** — the
   Redirect URI in Step 3.4 doesn't match exactly. Fix it and run
   `node dist/index.js setup` again.
-- **Claude says it can't see any qbo tools** — make sure you fully quit
-  and reopened Claude Desktop (closing the window is not enough).
+- **Claude says it can't see any qbo tools, and Settings → Developer
+  doesn't list `qbo`** — Claude Desktop was running when you ran setup and
+  overwrote the settings file when it quit. Quit Claude Desktop completely
+  (system tray → Quit, then check Task Manager for any remaining "Claude"
+  entries), run `node dist/index.js install` in the `mcp` folder, and open
+  Claude Desktop again.
 - **It worked for months, then stopped** — the QuickBooks connection
   expires after ~100 days of no use. In the `mcp` folder, run
   `node dist/index.js auth` to reconnect.
-- **You moved or renamed the project folder** — run
-  `node dist/index.js install` from the folder's new location.
+- **You moved or renamed the project folder** — quit Claude Desktop, then
+  run `node dist/index.js install` from the folder's new location.
 - **See the saved connection details** (company, when the connection
   expires) — run `node dist/index.js status`.
 
 ## Using Claude Code instead of Claude Desktop?
 
 After Step 5's `setup` finishes, it prints a `claude mcp add qbo ...`
-command — copy and run that one line, and skip Step 6's restart.
+command — copy and run that one line, and skip Step 6.

@@ -32,11 +32,7 @@ switch (command) {
       .catch(fail);
     break;
   case "install":
-    try {
-      runInstall();
-    } catch (error) {
-      fail(error);
-    }
+    runInstall().catch(fail);
     break;
   case "status":
     printStatus();

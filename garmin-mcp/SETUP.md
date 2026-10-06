@@ -65,6 +65,12 @@ see `package.json` in the list.
 
 ## Step 4 — Connect it (two commands)
 
+**First, quit Claude Desktop completely** if it's open. Closing the window
+isn't enough: on Windows, right-click the Claude icon in the system tray
+(click the **^** arrow by the clock if it's hidden) and choose **Quit**; on
+Mac, press Cmd+Q. Claude Desktop rewrites its settings file when it quits,
+and that would erase the connector you're about to add.
+
 In that terminal, run this first (it downloads the connector's parts —
 takes a minute):
 
@@ -94,6 +100,8 @@ This walks you through everything:
    sends a 6-digit code to your email or phone. Type it and press Enter.
 4. It signs in and then adds itself to Claude Desktop automatically. You
    should see `Added the "garmin" Garmin Connect connector to Claude Desktop`.
+   (If it instead says Claude Desktop is running, quit Claude Desktop as
+   described above and press Enter.)
    (Sign-in usually takes a few seconds. If you see "Waiting 15s before
    submitting", that's normal: Garmin blocked the quick method and the
    connector is pacing itself like a web browser would.)
@@ -101,12 +109,11 @@ This walks you through everything:
 Your password is used only to sign in and is not saved anywhere. The
 sign-in renews itself automatically from then on.
 
-## Step 5 — Restart Claude and try it
+## Step 5 — Open Claude and try it
 
-1. Fully quit Claude Desktop (**Mac:** Cmd+Q. **Windows:** right-click the
-   Claude icon in the system tray → Quit; if you don't see the icon, click
-   the **^** arrow at the right end of the taskbar to show hidden icons)
-   and open it again.
+1. Open Claude Desktop. The connector is listed under **Settings →
+   Developer** (not under Connectors or Extensions, which are for other
+   kinds of add-ons).
 2. Ask Claude:
 
    > Use garmin_daily_summary to show my stats for today.
@@ -139,17 +146,21 @@ rate this month to last month", "what's my training readiness?", or
 - **"Every sign-in method failed"** — Garmin changed something, or your
   network is being blocked. Copy the whole message (it never contains your
   password) and ask for help with it.
-- **Claude says it can't see any garmin tools** — make sure you fully quit
-  and reopened Claude Desktop (closing the window is not enough).
+- **Claude says it can't see any garmin tools, and Settings → Developer
+  doesn't list `garmin`** — Claude Desktop was running when you ran setup
+  and overwrote the settings file when it quit. Quit Claude Desktop
+  completely (system tray → Quit, then check Task Manager for any
+  remaining "Claude" entries), run `node dist/index.js install` in the
+  `garmin-mcp` folder, and open Claude Desktop again.
 - **It worked for months, then stopped** — Garmin revoked the sign-in,
   which happens after you change your Garmin password or sign out of all
   devices. In the `garmin-mcp` folder, run `node dist/index.js auth` to
   sign in again.
-- **You moved or renamed the project folder** — run
-  `node dist/index.js install` from the folder's new location.
+- **You moved or renamed the project folder** — quit Claude Desktop, then
+  run `node dist/index.js install` from the folder's new location.
 - **See the saved connection details** — run `node dist/index.js status`.
 
 ## Using Claude Code instead of Claude Desktop?
 
 After Step 4's `setup` finishes, it prints a `claude mcp add garmin ...`
-command — copy and run that one line, and skip Step 5's restart.
+command — copy and run that one line, and skip Step 5.
