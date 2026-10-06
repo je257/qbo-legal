@@ -152,6 +152,9 @@ A few of the many services behind `https://connectapi.garmin.com`:
 - **Revoke access:** change your Garmin password (invalidates the token)
   and/or delete `~/.garmin-mcp/`.
 - **Rebuild after changing the source:** `cd garmin-mcp && npm run build`.
+- **Run the tests:** `npm test` (offline; the sign-in cascade, token refresh,
+  range chunking, downloads and the MCP server run against mocked Garmin
+  responses).
 
 Independent, unofficial integration. Not affiliated with or endorsed by
 Garmin Ltd.
