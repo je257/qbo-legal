@@ -116,16 +116,20 @@ This walks you through everything:
 3. You land on a page titled "Authorization received" with a **Copy**
    button. Click it, go back to the terminal, paste (right-click pastes
    in PowerShell), and press Enter.
-4. It then adds itself to Claude Desktop automatically. You should see
-   `Added the "qbo" QuickBooks connector to Claude Desktop`.
+4. It then adds itself to Claude Desktop's config. You should see
+   `Added the "qbo" QuickBooks connector`. Keep this window open: it also
+   prints the exact text to paste if the next step doesn't show the
+   connector.
 
 ## Step 6 — Restart Claude and try it
 
-1. Fully quit Claude Desktop (**Mac:** Cmd+Q. **Windows:** right-click the
-   Claude icon in the system tray → Quit; if you don't see the icon, click
-   the **^** arrow at the right end of the taskbar to show hidden icons)
-   and open it again.
-2. Ask Claude:
+1. Quit Claude Desktop completely and open it again. Closing the window
+   isn't enough: on Windows, right-click the Claude icon in the system tray
+   (click the **^** arrow by the clock if it's hidden) and choose **Quit**;
+   on Mac, press Cmd+Q.
+2. Check **Settings → Developer**. `qbo` should be listed there. If it
+   isn't, see "Claude says it can't see any qbo tools" below.
+3. Ask Claude:
 
    > Use qbo_company_info to show my company profile.
 
@@ -158,13 +162,33 @@ invoices are overdue?"
 - **Browser shows an Intuit error instead of the sign-in page** — the
   Redirect URI in Step 3.4 doesn't match exactly. Fix it and run
   `node dist/index.js setup` again.
-- **Claude says it can't see any qbo tools** — make sure you fully quit
-  and reopened Claude Desktop (closing the window is not enough).
+- **Claude says it can't see any qbo tools, and Settings → Developer
+  doesn't list `qbo`** — Claude Desktop didn't pick up the entry setup
+  wrote. Add it through Desktop's own editor, which always works:
+  1. Settings → Developer → **Edit config**; right-click
+     `claude_desktop_config.json` → Open with → Notepad.
+  2. Inside `"mcpServers"`, add this entry (with a comma after the entry
+     before it), using the real location of your `mcp` folder:
+
+     ```json
+     "qbo": {
+       "command": "C:\\Program Files\\nodejs\\node.exe",
+       "args": ["C:\\path\\to\\qbo-legal-main\\mcp\\dist\\index.js"]
+     }
+     ```
+
+     (On Mac the command is `/usr/local/bin/node` or wherever `which node`
+     points, and paths use single forward slashes.) The `install` command
+     prints this block with your exact paths filled in.
+  3. Save, quit Claude Desktop completely, and open it again. If the list
+     goes empty, the file has a stray comma or brace; the printed block
+     and the entries around it must each be separated by exactly one comma.
 - **It worked for months, then stopped** — the QuickBooks connection
   expires after ~100 days of no use. In the `mcp` folder, run
   `node dist/index.js auth` to reconnect.
 - **You moved or renamed the project folder** — run
-  `node dist/index.js install` from the folder's new location.
+  `node dist/index.js install` from the folder's new location (or update
+  the path in Edit config), then restart Claude Desktop.
 - **See the saved connection details** (company, when the connection
   expires) — run `node dist/index.js status`.
 
