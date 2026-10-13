@@ -94,6 +94,67 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
+// Compensation components computed from a check's line items — verified against
+// this company's real checks (there is NO grossPay field on a Paychex check):
+//   grossWages        earnings[] with effectOnPay ADDITION, excluding reimbursements
+//   employer401kMatch earnings[] with effectOnPay ADDITION_WITH_IN_OUT (in/out — employer cost, not gross)
+//   employerTaxes     taxes[] with paidBy EMPLOYER_LIABILITY
+//   employerBenefits  informational[] with effectOnPay EMPLOYER_INFORMATIONAL
+//   reimbursements    earnings[] with classificationType Reimbursement (expense repay, not compensation)
+//   fullyLoaded       grossWages + employer401kMatch + employerTaxes + employerBenefits
+export const COMPONENT_FIELDS = [
+  "grossWages",
+  "employer401kMatch",
+  "employerTaxes",
+  "employerBenefits",
+  "reimbursements",
+  "fullyLoaded",
+] as const;
+
+function lineAmount(line: Json): number {
+  const amount = line.amount;
+  if (typeof amount === "number" && Number.isFinite(amount)) return amount;
+  if (typeof amount === "string" && amount.trim() !== "" && !Number.isNaN(Number(amount))) {
+    return Number(amount);
+  }
+  return 0;
+}
+
+function computeComponents(check: Json): {
+  totals: Record<string, number>;
+  hasLineItems: boolean;
+} {
+  const totals: Record<string, number> = Object.fromEntries(
+    COMPONENT_FIELDS.map((field) => [field, 0]),
+  );
+  const lines = (key: string): Json[] => (Array.isArray(check[key]) ? (check[key] as Json[]) : []);
+  const earnings = lines("earnings");
+  const taxes = lines("taxes");
+  const informational = lines("informational");
+  for (const line of earnings) {
+    if (String(line.classificationType ?? "").toLowerCase() === "reimbursement") {
+      totals.reimbursements += lineAmount(line);
+      continue;
+    }
+    const effect = String(line.effectOnPay ?? "").toUpperCase();
+    if (effect === "ADDITION") totals.grossWages += lineAmount(line);
+    else if (effect === "ADDITION_WITH_IN_OUT") totals.employer401kMatch += lineAmount(line);
+  }
+  for (const line of taxes) {
+    if (String(line.paidBy ?? "").toUpperCase() === "EMPLOYER_LIABILITY") {
+      totals.employerTaxes += lineAmount(line);
+    }
+  }
+  for (const line of informational) {
+    if (String(line.effectOnPay ?? "").toUpperCase() === "EMPLOYER_INFORMATIONAL") {
+      totals.employerBenefits += lineAmount(line);
+    }
+  }
+  totals.fullyLoaded =
+    totals.grossWages + totals.employer401kMatch + totals.employerTaxes + totals.employerBenefits;
+  return { totals, hasLineItems: earnings.length + taxes.length + informational.length > 0 };
+}
+
 export class PaychexClient {
   private config: AppConfig;
   private token: CachedToken | undefined;
@@ -218,6 +279,60 @@ export class PaychexClient {
     return this.get(`/companies/${encodeURIComponent(id)}/payperiods`, { query });
   }
 
+  // /payperiods returns HISTORY only when from/to are full ISO-8601 timestamps
+  // (observed in production: plain dates get a 400 API-8 or are ignored, and with
+  // no usable range the endpoint returns just a forward-looking window of
+  // unprocessed INITIAL periods — which looks exactly like "no payroll data").
+  private async fetchPayPeriods(companyId: string, from: string, to: string): Promise<Json[]> {
+    try {
+      const body = (await this.get(`/companies/${encodeURIComponent(companyId)}/payperiods`, {
+        query: { from: `${from}T00:00:00Z`, to: `${to}T23:59:59Z` },
+      })) as { content?: Json[] };
+      if ((body.content ?? []).length > 0) return body.content ?? [];
+    } catch {
+      // Some tenants may reject the params — fall back to the bare call below.
+    }
+    const body = (await this.get(`/companies/${encodeURIComponent(companyId)}/payperiods`)) as {
+      content?: Json[];
+    };
+    return body.content ?? [];
+  }
+
+  // The exact worker-deductions path varies; probe the known candidates and
+  // return whichever answers, so updates can target the real resource.
+  async workerDeductions(workerId: string): Promise<unknown> {
+    const candidates = [
+      `/workers/${encodeURIComponent(workerId)}/deductions`,
+      `/workers/${encodeURIComponent(workerId)}/compensation/deductions`,
+    ];
+    const attempts: { path: string; error: string }[] = [];
+    for (const path of candidates) {
+      try {
+        const data = await this.get(path);
+        return {
+          path,
+          data,
+          updateHint:
+            "To change one: copy the deduction object from data, modify the amount/percent " +
+            "(and effective date where supported), and send it with paychex_write (PATCH, or " +
+            "PUT per developer.paychex.com) to this same path or the deduction's own ID path. " +
+            "Confirm the exact change with the user before writing.",
+        };
+      } catch (error) {
+        attempts.push({
+          path,
+          error: error instanceof Error ? error.message.split("\n")[0] : String(error),
+        });
+      }
+    }
+    throw new PaychexError(
+      "No worker-deductions endpoint answered. Tried:\n" +
+        attempts.map((a) => `  ${a.path}: ${a.error}`).join("\n") +
+        "\nFetch the worker with paychex_worker and inspect its links array for a deductions " +
+        "resource, or check developer.paychex.com for the exact path, then use paychex_get.",
+    );
+  }
+
   async companyChecks(companyId: string | undefined, payPeriodId: string): Promise<unknown> {
     const id = await this.resolveCompanyId(companyId);
     return this.get(`/companies/${encodeURIComponent(id)}/checks`, {
@@ -293,7 +408,11 @@ export class PaychexClient {
       throw new PaychexError("from and to must be dates in YYYY-MM-DD form.");
     }
     const id = await this.resolveCompanyId(companyId);
-    const fields = sumFields && sumFields.length > 0 ? sumFields : ["grossPay", "netPay"];
+    // Default: computed compensation components from the check's line items —
+    // there is no grossPay field on a Paychex check, so raw-field defaults
+    // would silently total zero. sumFields switches to raw-field summing.
+    const useComponents = !sumFields || sumFields.length === 0;
+    const fields: string[] = useComponents ? [...COMPONENT_FIELDS] : sumFields;
 
     const deptByWorker = new Map<string, string>();
     const positionByWorker = new Map<string, string>();
@@ -319,9 +438,7 @@ export class PaychexClient {
       );
     }
 
-    const ppBody = (await this.get(`/companies/${encodeURIComponent(id)}/payperiods`)) as {
-      content?: Json[];
-    };
+    const ppBody = { content: await this.fetchPayPeriods(id, from, to) };
     // One date decides BOTH range membership and month bucket, so no period can
     // be pulled in by one date and bucketed by another (partial "leaked" months).
     const periodDate = (p: Json): string | undefined => {
@@ -427,14 +544,23 @@ export class PaychexClient {
         cell.byWorker.set(workerKey, workerCell);
         workerCell.checks += 1;
         let foundAny = false;
-        for (const field of fields) {
-          const extracted = extractMoney(check, field);
-          if (extracted !== undefined) {
-            cell.totals[field] += extracted.value;
-            workerCell.totals[field] += extracted.value;
-            foundAny = true;
-            if (extracted.occurrences > 1) {
-              (extracted.usedScalar ? fieldsWithAmbiguousShape : fieldsSummedAsLines).add(field);
+        if (useComponents) {
+          const components = computeComponents(check);
+          for (const field of fields) {
+            cell.totals[field] += components.totals[field];
+            workerCell.totals[field] += components.totals[field];
+          }
+          foundAny = components.hasLineItems;
+        } else {
+          for (const field of fields) {
+            const extracted = extractMoney(check, field);
+            if (extracted !== undefined) {
+              cell.totals[field] += extracted.value;
+              workerCell.totals[field] += extracted.value;
+              foundAny = true;
+              if (extracted.occurrences > 1) {
+                (extracted.usedScalar ? fieldsWithAmbiguousShape : fieldsSummedAsLines).add(field);
+              }
             }
           }
         }
@@ -532,11 +658,23 @@ export class PaychexClient {
           "line items with the same name were ignored — verify against sampleCheck.",
       );
     }
+    if (useComponents) {
+      notes.push(
+        "Totals are computed compensation components: grossWages (earnings ADDITION, excluding " +
+          "reimbursements), employer401kMatch (ADDITION_WITH_IN_OUT), employerTaxes (paidBy " +
+          "EMPLOYER_LIABILITY), employerBenefits (informational EMPLOYER_INFORMATIONAL), " +
+          "reimbursements (reported separately — not compensation), and fullyLoaded (wages + " +
+          "employer 401k + employer taxes + employer benefits). Pass sumFields for raw field sums.",
+      );
+    }
     if (checksMissingAllFields > 0) {
       notes.push(
-        `${checksMissingAllFields} of ${totalChecks} checks contained none of the summed fields ` +
-          `(${fields.join(", ")}). Inspect sampleCheck for the real money field names and call ` +
-          "again with them as sumFields.",
+        useComponents
+          ? `${checksMissingAllFields} of ${totalChecks} checks carried no earnings/taxes/` +
+              "informational line items — inspect sampleCheck; those checks contribute zero."
+          : `${checksMissingAllFields} of ${totalChecks} checks contained none of the summed fields ` +
+              `(${fields.join(", ")}). Inspect sampleCheck for the real money field names and call ` +
+              "again with them as sumFields.",
       );
     }
 
@@ -567,7 +705,7 @@ export class PaychexClient {
       throw new PaychexError("from and to must be dates in YYYY-MM-DD form.");
     }
     const id = await this.resolveCompanyId(companyId);
-    const body = (await this.get(`/companies/${encodeURIComponent(id)}/payperiods`)) as {
+    const body = { content: await this.fetchPayPeriods(id, from, to) } as {
       content?: Record<string, unknown>[];
     };
     const inRange = (value: unknown): boolean =>

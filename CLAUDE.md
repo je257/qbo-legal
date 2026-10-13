@@ -105,6 +105,40 @@ Claude Desktop's config file: `%APPDATA%\Claude\claude_desktop_config.json`
 `mcpServers.paychex` with an absolute node path + absolute `dist/index.js`
 path. Hand-editing that file is the fallback when `install` can't run.
 
+## Paychex Flex API facts (verified in production, 2026-09/10)
+
+- **`/companies/{id}/payperiods` returns history only with full ISO-8601
+  `from`/`to` timestamps** (`2026-07-01T00:00:00Z`); plain dates get 400
+  API-8 or are ignored, and the bare endpoint returns only ~7 forward
+  unprocessed `INITIAL` periods — which looks exactly like "no payroll
+  data". `fetchPayPeriods` in paychex.ts sends ISO timestamps (with a bare
+  fallback); never conclude history is missing until retried with ISO.
+- **There is no `grossPay` field on a check.** Money lives in line items:
+  gross wages = `earnings[]` `effectOnPay==ADDITION` excluding
+  `classificationType==Reimbursement`; employer 401(k) match =
+  `ADDITION_WITH_IN_OUT`; employer taxes = `taxes[]`
+  `paidBy==EMPLOYER_LIABILITY`; employer benefits = `informational[]`
+  `EMPLOYER_INFORMATIONAL`; `deductions[]` are employee-side (inside
+  gross). Fully loaded = wages + ER 401k + ER taxes + ER benefits.
+  `computeComponents` in paychex.ts implements this and is the
+  paychex_payroll_costs default.
+- The owner's company has ONE organization unit ("Company") — department
+  grouping is useless there; the real split is `job.title` (Advisor /
+  Operations / Marketing) via groupBy "position". Off-cycle bonus runs
+  carry checks for other positions; never skip them.
+- A check belongs to the month of its `checkDate`, never the period span.
+- **Worker recurring deductions**: Paychex's Benefits Administration docs
+  say worker-level recurring earnings/deductions are manageable through
+  the Payroll APIs with effective dating; the exact path varies —
+  `paychex_worker_deductions` probes candidates and returns the live one,
+  and `paychex_write` performs the update. **A percentage deduction's
+  calculation basis (e.g. 401(k) on base pay only, excluding
+  bonuses/supplemental) is plan / pay-component configuration, not a
+  per-worker API field** — it's set in Paychex Flex or through the
+  Paychex retirement team, and for a 401(k) it must match the plan
+  document's definition of eligible compensation (a mismatch is a
+  compliance correction, not a payroll preference).
+
 ## Conventions for changes
 
 - Keep the two packages mirror images: same CLI commands, same file layout

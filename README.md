@@ -197,7 +197,8 @@ each write before making it.
 | `paychex_payroll_history` | Pay periods in a date range, each with its checks |
 | `paychex_departments` | The company's organization units (departments) |
 | `paychex_workers_by_department` | Roster segmented by department |
-| `paychex_payroll_costs` | Monthly payroll costs by department, position, or employee |
+| `paychex_payroll_costs` | Monthly payroll costs by department, position, or employee (fully-loaded components by default) |
+| `paychex_worker_deductions` | A worker's recurring deductions, with update guidance |
 | `paychex_get` | Any other GET endpoint (jobs, pay components, pay rates, ...) |
 | `paychex_write` | POST/PATCH/PUT/DELETE to any documented write endpoint |
 

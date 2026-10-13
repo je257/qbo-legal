@@ -34,7 +34,7 @@ const companyIdField = z
   );
 
 export async function startServer(): Promise<void> {
-  const server = new McpServer({ name: "paychex-mcp", version: "0.5.0" });
+  const server = new McpServer({ name: "paychex-mcp", version: "0.6.0" });
 
   server.registerTool(
     "paychex_auth_status",
@@ -111,6 +111,26 @@ export async function startServer(): Promise<void> {
       annotations: { readOnlyHint: true },
     },
     ({ workerId }) => run(() => PaychexClient.load().worker(workerId)),
+  );
+
+  server.registerTool(
+    "paychex_worker_deductions",
+    {
+      title: "Worker deductions",
+      description:
+        "Read a worker's recurring payroll deductions (401k deferral, health premiums, ...). " +
+        "Probes the known Paychex deduction paths and reports which one answered, plus an " +
+        "updateHint describing how to change a deduction via paychex_write. Note: changing WHICH " +
+        "earnings a percentage deduction calculates on (e.g. base pay only, excluding bonuses) is " +
+        "plan/pay-component configuration, usually not changeable through this API — check the " +
+        "company's paycomponents via paychex_get and advise the user to make basis changes in " +
+        "Paychex Flex or through their Paychex retirement representative.",
+      inputSchema: {
+        workerId: z.string().describe("The worker's ID (from paychex_workers)"),
+      },
+      annotations: { readOnlyHint: true },
+    },
+    ({ workerId }) => run(() => PaychexClient.load().workerDeductions(workerId)),
   );
 
   server.registerTool(
@@ -229,11 +249,13 @@ export async function startServer(): Promise<void> {
         "call; the notes name any truncation or partial month). Department grouping prefers a " +
         "department recorded on the check itself when present; otherwise (and for positions) each " +
         "check follows the worker's CURRENT attribute applied retroactively — the notes say when " +
-        "this applies. Money fields (default grossPay and netPay) found once per check are used " +
-        "directly; found as repeated line items, the lines are summed. The response includes a " +
-        "sampleCheck with the raw check fields — if totals come back zero or you need " +
-        "employer-side costs (employer taxes, benefits), read sampleCheck for the actual field " +
-        'names and call again passing them as sumFields. Checks of departed workers appear under ' +
+        "this applies. By default, totals are computed compensation components from each check's " +
+        "line items: grossWages, employer401kMatch, employerTaxes, employerBenefits, " +
+        "reimbursements (reported separately — not compensation), and fullyLoaded (the true " +
+        "employer cost: wages + employer 401k + employer taxes + employer benefits) — there is no " +
+        "grossPay field on a Paychex check. Pass sumFields to sum raw check fields instead (found " +
+        "once per check, used directly; repeated line items are summed). The response includes a " +
+        'sampleCheck with the raw check fields. Checks of departed workers appear under ' +
         '"Not in current roster" (or their workerId when grouping by employee). Read the notes ' +
         "array before presenting numbers. Pass breakdown: true for per-employee subtotals inside " +
         "each department or position cell.",
