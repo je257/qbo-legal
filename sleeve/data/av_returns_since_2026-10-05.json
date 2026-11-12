@@ -1,0 +1,23 @@
+{
+  "_note": "Cumulative price returns (close-to-close) from 2026-10-05 to the latest close, fetched via Alpha Vantage ANALYTICS_FIXED_WINDOW while the YCharts connector is down. Used to roll the verified 10/5 monitor weights forward: w_new = w_old*(1+r)/sum(w*(1+r)). Free-tier quota allows ~3 batches of 5 per day; fetched_through marks the close each batch reflects. Remaining tickers to fetch are in 'pending'.",
+  "baselineClose": "2026-10-05",
+  "returns": {
+    "AAPL": {"r": 0.06831085343506871, "through": "2026-11-11"},
+    "AMAT": {"r": -0.27144648521059234, "through": "2026-11-11"},
+    "AMGN": {"r": 0.161620924115341, "through": "2026-11-11"},
+    "AMZN": {"r": 0.0587509944311857, "through": "2026-11-11"},
+    "APH": {"r": -0.09121118368282288, "through": "2026-11-11"},
+    "AXP": {"r": 0.0660682052116659, "through": "2026-11-11"},
+    "BNY": {"r": 0.06673798543043952, "through": "2026-11-11"},
+    "BR": {"r": 0.21228312798591942, "through": "2026-11-11"},
+    "BX": {"r": 0.10297745629054478, "through": "2026-11-11"},
+    "COST": {"r": 0.17938906766401996, "through": "2026-11-11"},
+    "CVX": {"r": 0.03298299995156628, "through": "2026-11-11"},
+    "DHR": {"r": 0.0637403372361105, "through": "2026-11-11"},
+    "DKS": {"r": 0.09078976154014473, "through": "2026-11-11"},
+    "ECL": {"r": 0.11112715198325285, "through": "2026-11-11"},
+    "HD": {"r": 0.2495465054241508, "through": "2026-11-11"}
+  },
+  "pending": ["IDXX","JPM","KLAC","LLY","LMT","LRCX","MS","MSFT","NEM","NFLX","NVDA","BKNG","PEP","RSG","SCHW","TROW","ULTA","UNH","UNP","WMT","XOM","YUM","KMI","META","PANW","ABBV","ZTS","GOOGL","BKR","HON","NEE","VRT","IBKR","CTVA","DDOG","OTIS","CEG"],
+  "priorityNextFetch": ["MSFT","NVDA","GOOGL","META","PANW","JPM","SCHW","DDOG","LRCX","KLAC"]
+}
