@@ -1,9 +1,15 @@
 # qbo-legal
 
-Private, local connectors for Claude. The main one is QuickBooks Online;
-see also **[`garmin-mcp/`](garmin-mcp/)** — a Garmin Connect connector with
-full access to wellness, sleep, training and activity data
-([setup guide](garmin-mcp/SETUP.md)).
+Private connectors for Claude:
+
+- **QuickBooks Online** — `mcp/` (documented below)
+- **Garmin Connect** — [`garmin-mcp/`](garmin-mcp/): wellness, sleep, training
+  and activity data ([setup guide](garmin-mcp/SETUP.md))
+- **Ninety.io** — [`ninety-mcp/`](ninety-mcp/README.md): To-Dos, Rocks,
+  Milestones, Issues, Scorecard, Meetings, V/TO, Teams and Users via Ninety's
+  public API. Runs on your own computer for Claude Desktop, and optionally in
+  the cloud so the Claude phone app can use it
+  ([cloud setup](ninety-mcp/SETUP-CLOUD.md)).
 
 The QuickBooks Online connector is in two parts:
 

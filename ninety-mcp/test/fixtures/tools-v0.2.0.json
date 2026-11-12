@@ -1,0 +1,2065 @@
+{
+  "serverInfo": {
+    "name": "ninety-mcp",
+    "version": "0.2.0"
+  },
+  "toolCount": 48,
+  "tools": [
+    {
+      "name": "ninety_auth_status",
+      "title": "Ninety connection status",
+      "description": "Check whether a Ninety Personal Access Token is configured and working. Verifies the token by listing the teams it can access.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_teams",
+      "title": "List Ninety teams",
+      "description": "List all Teams the authenticated user belongs to (id and name).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_teams_available",
+      "title": "List teams available for creating work",
+      "description": "List the Teams the authenticated user may pick when creating or querying work — their own teams plus, for Owners/Admins/Implementers, every non-private team. Each is flagged with isMember.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_users",
+      "title": "List Ninety users",
+      "description": "List every active User in the company with role, teams, and email — useful for resolving a name to the userId that create/assign endpoints accept. Filter to one person with the email parameter.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Return only the User at this email (case-insensitive)"
+          },
+          "includeInactive": {
+            "type": "boolean",
+            "description": "Also include deactivated Users (default false)"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_team_users",
+      "title": "Get the users on a team",
+      "description": "List the Users assigned to a Team, ordered by name, with role and team memberships.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "includeInactive": {
+            "type": "boolean",
+            "description": "Also include deactivated Users (default false)"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_user_get",
+      "title": "Get a Ninety user",
+      "description": "Get a User by Id (name and primary email). To search by name or email, use ninety_users.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The User Id"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_todos_query",
+      "title": "Query Ninety To-Dos",
+      "description": "List To-Dos matching filters. Returns an array of To-Dos (title, description, dueDate, completed, archived, teamId/teamName, userId).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "isPersonal": {
+            "type": "boolean",
+            "description": "Only personal To-Dos (not tied to a team)"
+          },
+          "completed": {
+            "type": "boolean",
+            "description": "Filter by completed status"
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "Filter by archived status"
+          },
+          "searchText": {
+            "type": "string",
+            "description": "Match against To-Do title and description"
+          },
+          "title": {
+            "type": "string",
+            "description": "Exact title match"
+          },
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by assignee user Ids. Omit alongside teamId to get the whole team's To-Dos."
+          },
+          "dueDateFrom": {
+            "type": "string",
+            "description": "Earliest due date to return, YYYY-MM-DD (UTC), inclusive"
+          },
+          "dueDateTo": {
+            "type": "string",
+            "description": "Latest due date to return, YYYY-MM-DD (UTC), inclusive"
+          },
+          "sort": {
+            "type": "string",
+            "description": "Field to sort by, e.g. \"dueDate\""
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          "page": {
+            "type": "number",
+            "description": "Page number (1-based)"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Results per page (max 100)"
+          },
+          "paged": {
+            "type": "boolean",
+            "description": "true returns {items, totalCount} pagination metadata instead of a bare array"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_todo_get",
+      "title": "Get a Ninety To-Do",
+      "description": "Get a single To-Do by Id.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The To-Do Id"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_todo_create",
+      "title": "Create a Ninety To-Do",
+      "description": "Create a To-Do. Omit teamId for a personal To-Do.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the To-Do"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "Due date, YYYY-MM-DD"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "Team to assign the To-Do to; omit for a personal To-Do"
+          },
+          "repeat": {
+            "type": "string",
+            "description": "Recurrence pattern, e.g. \"weekly\", \"monthly\""
+          },
+          "userId": {
+            "type": "string",
+            "description": "User to assign to; defaults to the authenticated user"
+          },
+          "linkedItemId": {
+            "type": "string",
+            "description": "Id of a Rock, Issue, or Milestone to link this To-Do to (requires linkedItemType)"
+          },
+          "linkedItemType": {
+            "type": "string",
+            "enum": [
+              "rock",
+              "issue",
+              "milestone"
+            ]
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_todo_update",
+      "title": "Update a Ninety To-Do",
+      "description": "Partially update a To-Do — only the fields provided are changed.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The To-Do Id"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "Due date in ISO format"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "completed": {
+            "type": "boolean"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "repeat": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Reassign the To-Do to this user"
+          },
+          "linkedItemId": {
+            "type": "string",
+            "description": "Id of a Rock, Issue, or Milestone to link this To-Do to (requires linkedItemType)"
+          },
+          "linkedItemType": {
+            "type": "string",
+            "enum": [
+              "rock",
+              "issue",
+              "milestone"
+            ]
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_todo_delete",
+      "title": "Delete a Ninety To-Do",
+      "description": "Permanently delete a To-Do by Id.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The To-Do Id"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_todos_company",
+      "title": "List company-wide To-Dos",
+      "description": "List every non-personal To-Do across the whole company (Owners/Admins only), cursor-paginated. Pass the previous response's pagination.nextToken to get the next page.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum items to return"
+          },
+          "nextToken": {
+            "type": "string",
+            "description": "Cursor from the previous response's pagination.nextToken"
+          },
+          "completed": {
+            "type": "boolean"
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "Include archived To-Dos (excluded by default)"
+          },
+          "deleted": {
+            "type": "boolean",
+            "description": "Include deleted To-Dos (excluded by default)"
+          },
+          "searchText": {
+            "type": "string",
+            "description": "Match against title, description, and comments"
+          },
+          "title": {
+            "type": "string",
+            "description": "Filter by title match"
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "createdDate",
+              "completedDate",
+              "title"
+            ]
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_todo_comment",
+      "title": "Comment on a To-Do",
+      "description": "Append one comment to a To-Do, attributed to the authenticated user. Returns the full comment list.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The To-Do Id"
+          },
+          "text": {
+            "type": "string",
+            "description": "The comment text (plain text preferred)"
+          }
+        },
+        "required": [
+          "id",
+          "text"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_todo_link",
+      "title": "Link a To-Do to a Rock, Issue, or Milestone",
+      "description": "Create a link between an existing To-Do and an existing Rock, Issue, or Milestone without changing the To-Do's own fields.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "todoId": {
+            "type": "string",
+            "description": "The To-Do Id"
+          },
+          "linkedItemId": {
+            "type": "string",
+            "description": "Id of the Rock, Issue, or Milestone to link to"
+          },
+          "linkedItemType": {
+            "type": "string",
+            "enum": [
+              "rock",
+              "issue",
+              "milestone"
+            ]
+          }
+        },
+        "required": [
+          "todoId",
+          "linkedItemId",
+          "linkedItemType"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_todo_unlink",
+      "title": "Remove a To-Do link",
+      "description": "Remove an existing link between a To-Do and a Rock, Issue, or Milestone.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "todoId": {
+            "type": "string",
+            "description": "The To-Do Id"
+          },
+          "linkedItemId": {
+            "type": "string",
+            "description": "Id of the linked Rock, Issue, or Milestone"
+          }
+        },
+        "required": [
+          "todoId",
+          "linkedItemId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_issues_query",
+      "title": "Query Ninety Issues",
+      "description": "Paginated list of Issues. Returns items plus totalCount. Issues are SHORT_TERM (weekly/session) or LONG_TERM (ongoing).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "A team Id or comma-separated team Ids; omit to query all teams"
+          },
+          "intervalCode": {
+            "type": "string",
+            "enum": [
+              "SHORT_TERM",
+              "LONG_TERM"
+            ]
+          },
+          "searchText": {
+            "type": "string",
+            "description": "Match against title, description, and comments"
+          },
+          "sortField": {
+            "type": "string",
+            "description": "Field to sort by (default \"createdDate\")"
+          },
+          "sortDirection": {
+            "type": "string",
+            "enum": [
+              "ASC",
+              "DESC"
+            ]
+          },
+          "pageIndex": {
+            "type": "number",
+            "description": "Zero-based page index (default 0)"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Items per page (default 10)"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_issue_get",
+      "title": "Get a Ninety Issue",
+      "description": "Get a single Issue by Id.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "issueId": {
+            "type": "string",
+            "description": "The Issue Id"
+          }
+        },
+        "required": [
+          "issueId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_issue_create",
+      "title": "Create a Ninety Issue",
+      "description": "Create an Issue for a team.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Title of the Issue"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "interval": {
+            "type": "string",
+            "enum": [
+              "SHORT_TERM",
+              "LONG_TERM"
+            ],
+            "description": "Issue classification (default SHORT_TERM)"
+          },
+          "description": {
+            "type": "string",
+            "description": "HTML description"
+          },
+          "priority": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5,
+            "description": "0 (none) to 5 (highest)"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User to assign the Issue to; defaults to the authenticated user"
+          }
+        },
+        "required": [
+          "title",
+          "teamId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_issue_update",
+      "title": "Update a Ninety Issue",
+      "description": "Partially update an Issue — only the fields provided are changed. Set completed=true to resolve it.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "issueId": {
+            "type": "string",
+            "description": "The Issue Id"
+          },
+          "title": {
+            "type": "string"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "interval": {
+            "type": "string",
+            "enum": [
+              "SHORT_TERM",
+              "LONG_TERM"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "HTML description"
+          },
+          "priority": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "completed": {
+            "type": "boolean",
+            "description": "true marks the Issue resolved"
+          }
+        },
+        "required": [
+          "issueId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_issue_delete",
+      "title": "Delete a Ninety Issue",
+      "description": "Permanently delete an Issue by Id.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "issueId": {
+            "type": "string",
+            "description": "The Issue Id"
+          }
+        },
+        "required": [
+          "issueId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_issues_company",
+      "title": "List company-wide Issues",
+      "description": "List every non-archived, non-deleted Issue across the whole company (Owners/Admins only), cursor-paginated. Pass the previous response's pagination.nextToken to get the next page.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum items to return"
+          },
+          "nextToken": {
+            "type": "string",
+            "description": "Cursor from the previous response's pagination.nextToken"
+          },
+          "completed": {
+            "type": "boolean"
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "Include archived Issues (excluded by default)"
+          },
+          "deleted": {
+            "type": "boolean",
+            "description": "Include deleted Issues (excluded by default)"
+          },
+          "searchText": {
+            "type": "string",
+            "description": "Match against title, description, and comments"
+          },
+          "title": {
+            "type": "string",
+            "description": "Filter by title match"
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "createdDate",
+              "completedDate",
+              "title",
+              "_id"
+            ]
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_issue_comment",
+      "title": "Comment on an Issue",
+      "description": "Append one comment to an Issue, attributed to the authenticated user. Returns the full comment list.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "issueId": {
+            "type": "string",
+            "description": "The Issue Id"
+          },
+          "text": {
+            "type": "string",
+            "description": "The comment text (plain text preferred)"
+          }
+        },
+        "required": [
+          "issueId",
+          "text"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_rocks_query",
+      "title": "Query Ninety Rocks",
+      "description": "List Rocks (quarterly goals), grouped by teamId, with paging. Each Rock includes its milestones. futureScope filters the planning horizon; pass \"all\" to span every scope.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "userId": {
+            "type": "string",
+            "description": "Filter by owner user Id"
+          },
+          "userIds": {
+            "type": "string",
+            "description": "Comma-separated user Ids (alternative to userId)"
+          },
+          "statusCode": {
+            "type": "string",
+            "enum": [
+              "OFF_TRACK",
+              "ON_TRACK",
+              "DONE",
+              "CANCELED",
+              "DRAFT"
+            ]
+          },
+          "levelCode": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "COMPANY_AND_DEPARTMENT",
+              "COMPANY",
+              "DEPARTMENT"
+            ]
+          },
+          "futureScope": {
+            "type": "string",
+            "enum": [
+              "Current",
+              "Next",
+              "Later",
+              "Future",
+              "all"
+            ]
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "true for archived Rocks only; default active only"
+          },
+          "searchText": {
+            "type": "string",
+            "description": "Match against title or description"
+          },
+          "includeRockGoals": {
+            "type": "boolean",
+            "description": "Include linked goals in the response"
+          },
+          "sortField": {
+            "type": "string",
+            "enum": [
+              "title",
+              "statusCode",
+              "dueDate",
+              "completedDate",
+              "owner",
+              "team",
+              "dueDateQuarter"
+            ],
+            "description": "Default dueDate"
+          },
+          "sortDirection": {
+            "type": "string",
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "description": "Default DESC"
+          },
+          "pageIndex": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Zero-based page index (default 0)"
+          },
+          "pageSize": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 200,
+            "description": "Items per page, max 200 (default 50)"
+          },
+          "paged": {
+            "type": "boolean",
+            "description": "true returns a flat {items, totalCount} page instead of Rocks grouped by teamId"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_rock_get",
+      "title": "Get a Ninety Rock",
+      "description": "Get a single Rock by Id, including its milestones, comments, and attachments.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The Rock Id"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_rock_create",
+      "title": "Create a Ninety Rock",
+      "description": "Create a Rock (quarterly goal) owned by the authenticated user. statusCode defaults to ON_TRACK, levelCode to USER, quarter to None.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the Rock"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "Due date, ISO 8601, e.g. \"2026-12-31T23:59:59.000Z\""
+          },
+          "statusCode": {
+            "type": "string",
+            "enum": [
+              "OFF_TRACK",
+              "ON_TRACK",
+              "DONE",
+              "CANCELED",
+              "DRAFT"
+            ]
+          },
+          "levelCode": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "COMPANY_AND_DEPARTMENT",
+              "COMPANY",
+              "DEPARTMENT"
+            ]
+          },
+          "quarter": {
+            "type": "string",
+            "enum": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4",
+              "None"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "futureScope": {
+            "type": "string",
+            "enum": [
+              "Current",
+              "Next",
+              "Later",
+              "Future"
+            ]
+          },
+          "additionalTeamIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Other teams that can view this Rock"
+          },
+          "rockQuarterYearDueDate": {
+            "type": "string",
+            "description": "Quarter-aligned year due date (ISO 8601)"
+          },
+          "addCreatorToFollowersList": {
+            "type": "boolean",
+            "description": "Add yourself as a follower"
+          }
+        },
+        "required": [
+          "teamId",
+          "title",
+          "dueDate"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_rock_update",
+      "title": "Update a Ninety Rock",
+      "description": "Partially update a Rock — only the fields provided are changed. Set statusCode=DONE to complete it, archived=true to archive.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The Rock Id"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Reassign the Rock to this user"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "string",
+            "enum": [
+              "OFF_TRACK",
+              "ON_TRACK",
+              "DONE",
+              "CANCELED",
+              "DRAFT"
+            ]
+          },
+          "levelCode": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "COMPANY_AND_DEPARTMENT",
+              "COMPANY",
+              "DEPARTMENT"
+            ]
+          },
+          "quarter": {
+            "type": "string",
+            "enum": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4",
+              "None"
+            ]
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "ISO 8601"
+          },
+          "rockQuarterYearDueDate": {
+            "type": "string",
+            "description": "ISO 8601"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "futureScope": {
+            "type": "string",
+            "enum": [
+              "Current",
+              "Next",
+              "Later",
+              "Future"
+            ]
+          },
+          "additionalTeamIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_rock_delete",
+      "title": "Delete a Ninety Rock",
+      "description": "Soft-delete a Rock by Id. Returns the deleted Rock.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The Rock Id"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_rocks_company",
+      "title": "List company-wide Rocks",
+      "description": "List every non-archived, non-deleted Rock across the whole company (Owners/Admins only), cursor-paginated. Pass the previous response's pagination.nextToken to get the next page.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Maximum items to return"
+          },
+          "nextToken": {
+            "type": "string",
+            "description": "Cursor from the previous response's pagination.nextToken"
+          },
+          "completed": {
+            "type": "boolean"
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "Include archived Rocks (excluded by default)"
+          },
+          "deleted": {
+            "type": "boolean",
+            "description": "Include deleted Rocks (excluded by default)"
+          },
+          "searchText": {
+            "type": "string",
+            "description": "Match against title and description"
+          },
+          "title": {
+            "type": "string",
+            "description": "Filter by title match"
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "createdDate",
+              "completedDate",
+              "title",
+              "dueDate",
+              "id"
+            ]
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_rock_milestones",
+      "title": "List a Rock's Milestones",
+      "description": "Get all Milestones for a Rock by its Id.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The Rock Id"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_milestone_get",
+      "title": "Get a Ninety Milestone",
+      "description": "Get a single Milestone by Id. To list a Rock's milestones, use ninety_rock_milestones.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The Milestone Id"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_milestone_create",
+      "title": "Create a Ninety Milestone",
+      "description": "Create a Milestone on a Rock.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "rockId": {
+            "type": "string",
+            "description": "The Rock this Milestone belongs to"
+          },
+          "title": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "ISO 8601"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "description": {
+            "type": "string"
+          },
+          "userOrdinal": {
+            "type": "number",
+            "description": "0-based position in the user's list"
+          },
+          "toDoId": {
+            "type": "string",
+            "description": "Id of a related To-Do, if any"
+          },
+          "isDone": {
+            "type": "boolean",
+            "description": "true if already done at creation"
+          },
+          "completedDate": {
+            "type": "string",
+            "description": "ISO 8601; required when isDone is true"
+          }
+        },
+        "required": [
+          "rockId",
+          "title",
+          "dueDate",
+          "teamId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_milestone_update",
+      "title": "Update a Ninety Milestone",
+      "description": "Partially update a Milestone — only the fields provided are changed. Set isDone=true (with completedDate) to complete it. The public API has no milestone delete endpoint.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The Milestone Id"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "ISO 8601"
+          },
+          "isDone": {
+            "type": "boolean"
+          },
+          "completedDate": {
+            "type": "string",
+            "description": "ISO 8601; provide when setting isDone to true"
+          },
+          "ownedByUserId": {
+            "type": "string",
+            "description": "Reassign the Milestone to this user"
+          },
+          "followers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "User Ids following this Milestone"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_kpis_query",
+      "title": "Query Ninety Measurables (KPIs)",
+      "description": "Paginated list of Scorecard Measurables with metadata: _id, title, unit, currency, periodInterval, defaultGoal, owner, isSmart (formula-based — never write scores to these), isUsedInFormula, lastScoreUpdatedAt, teams, scorecards. For score VALUES use ninety_team_scorecard or ninety_get_score.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "Limit to Measurables on this Team's Scorecards"
+          },
+          "searchText": {
+            "type": "string",
+            "description": "Match against Measurable title or description"
+          },
+          "searchTitle": {
+            "type": "string",
+            "description": "Match against title only"
+          },
+          "searchOwner": {
+            "type": "string",
+            "description": "Match against owner name"
+          },
+          "periodInterval": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "annual"
+            ]
+          },
+          "userIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by owner user Ids"
+          },
+          "unassignedOnly": {
+            "type": "boolean",
+            "description": "Only Measurables with no owner"
+          },
+          "excludeKpiIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Measurable Ids to exclude"
+          },
+          "sortField": {
+            "type": "string",
+            "enum": [
+              "id",
+              "owner",
+              "title"
+            ]
+          },
+          "sortDirection": {
+            "type": "string",
+            "enum": [
+              "ASC",
+              "DESC"
+            ]
+          },
+          "pageIndex": {
+            "type": "number",
+            "description": "Page number to retrieve"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Items per page"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_team_scorecard",
+      "title": "Read a Team's Scorecard",
+      "description": "Read a Team's Scorecard — its Measurables WITH their score values, notes, and goals — for a window of periods. Every score is labelled with the period as Ninety displays it; select periods by matching those labels. Use date to get the single period containing that calendar date.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "periodInterval": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "quarterly",
+              "annual"
+            ],
+            "description": "Which of the Team's Scorecards to read (default weekly)"
+          },
+          "window": {
+            "type": "string",
+            "enum": [
+              "default",
+              "qtd",
+              "ytd",
+              "currentQuarter",
+              "currentYear"
+            ],
+            "description": "Window of periods to return (default: the most recent 13 periods). Ignored when date is set."
+          },
+          "date": {
+            "type": "string",
+            "description": "Return only the single period containing this calendar date (YYYY-MM-DD)"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_get_score",
+      "title": "Read one Measurable's score",
+      "description": "Read a single Measurable's score for the period containing the given date. Prefer this over ninety_team_scorecard when only one number is needed. value is null when no score is recorded for that period (not an error).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpiId": {
+            "type": "string",
+            "description": "The Measurable Id"
+          },
+          "date": {
+            "type": "string",
+            "description": "Any calendar date inside the target period (YYYY-MM-DD); it is snapped to the period"
+          }
+        },
+        "required": [
+          "kpiId",
+          "date"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_update_score",
+      "title": "Update a score, note, or period goal",
+      "description": "Update a Measurable's score, note, and/or custom goal for one period in a single call. Supply at least one of value, note, goal; omitted fields are unchanged and null clears a field. The goal is a per-period override only — it does not change the Measurable's default goal.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpiId": {
+            "type": "string",
+            "description": "The Measurable Id"
+          },
+          "periodStartDate": {
+            "type": "string",
+            "description": "Any calendar date within the target period (YYYY-MM-DD or ISO datetime)"
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Score value; null clears it"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Note text; null clears it"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Per-period goal override, e.g. {\"value\": 100} or a range {\"min\": 90, \"max\": 110}; null removes it"
+          }
+        },
+        "required": [
+          "kpiId",
+          "periodStartDate"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_put_score",
+      "title": "Set a Measurable score",
+      "description": "Create or update the score for a Measurable (KPI) for a period. An existing score for that period is silently overwritten. Never write to formula-based (isSmart) Measurables — they compute from other Measurables. A Measurable with isUsedInFormula=true feeds downstream calculated Measurables.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpiId": {
+            "type": "string",
+            "description": "The Measurable Id"
+          },
+          "periodStartDate": {
+            "type": "string",
+            "description": "Period start date, ISO 8601 — the first day of the period, e.g. \"2026-07-01\" or \"2026-07-01T00:00:00.000Z\". For monthly Measurables this is the first of the month; for weekly, the first day of the week."
+          },
+          "value": {
+            "type": "number",
+            "description": "The score value"
+          }
+        },
+        "required": [
+          "kpiId",
+          "periodStartDate",
+          "value"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_put_note",
+      "title": "Set a Measurable note",
+      "description": "Create or update the note on a Measurable (KPI) for a period. An existing note for that period is overwritten.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpiId": {
+            "type": "string",
+            "description": "The Measurable Id"
+          },
+          "periodStartDate": {
+            "type": "string",
+            "description": "Period start date, ISO 8601 — the first day of the period, e.g. \"2026-07-01\" or \"2026-07-01T00:00:00.000Z\". For monthly Measurables this is the first of the month; for weekly, the first day of the week."
+          },
+          "note": {
+            "type": "string",
+            "description": "The note text"
+          }
+        },
+        "required": [
+          "kpiId",
+          "periodStartDate",
+          "note"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_delete_score",
+      "title": "Delete a Measurable score",
+      "description": "Delete the score for a Measurable (KPI) for a given period start date.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpiId": {
+            "type": "string",
+            "description": "The Measurable Id"
+          },
+          "periodStartDate": {
+            "type": "string",
+            "description": "Period start date, ISO 8601 — the first day of the period, e.g. \"2026-07-01\" or \"2026-07-01T00:00:00.000Z\". For monthly Measurables this is the first of the month; for weekly, the first day of the week."
+          }
+        },
+        "required": [
+          "kpiId",
+          "periodStartDate"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_delete_note",
+      "title": "Delete a Measurable note",
+      "description": "Delete the note on a Measurable (KPI) for a given period start date.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kpiId": {
+            "type": "string",
+            "description": "The Measurable Id"
+          },
+          "periodStartDate": {
+            "type": "string",
+            "description": "Period start date, ISO 8601 — the first day of the period, e.g. \"2026-07-01\" or \"2026-07-01T00:00:00.000Z\". For monthly Measurables this is the first of the month; for weekly, the first day of the week."
+          }
+        },
+        "required": [
+          "kpiId",
+          "periodStartDate"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_meeting_next",
+      "title": "Get a Team's next Meeting",
+      "description": "Get the soonest upcoming Meeting for a Team, with its agenda sections and roster. Only the near term is considered, so a 404 means nothing is scheduled soon — not that the Team never meets.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_meetings",
+      "title": "List a Team's past Meetings",
+      "description": "List a Team's concluded Meetings, most recent first, with attendee ratings, duration, and Issues worked. meetingType filters to one kind per call (level10 is the Weekly Meeting).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "meetingType": {
+            "type": "string",
+            "enum": [
+              "level10",
+              "quarterly",
+              "annualDayOne",
+              "annualDayTwo",
+              "focusDay",
+              "visionBuildingDayOne",
+              "visionBuildingDayTwo",
+              "weeklyOneOnOne",
+              "custom",
+              "other"
+            ],
+            "description": "Which kind of Meeting to return (level10 = Weekly Meeting)"
+          },
+          "pageIndex": {
+            "type": "number",
+            "description": "Page to return, counting from 0"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Meetings per page"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_meeting_get",
+      "title": "Get one Meeting",
+      "description": "Get one concluded Meeting with the notes taken during it and the Headlines, cascading messages, Issues, To-Dos, and Rocks it worked. Notes are the only free-text record of what was decided.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "meetingId": {
+            "type": "string",
+            "description": "The Meeting Id"
+          }
+        },
+        "required": [
+          "meetingId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_vto",
+      "title": "Get a Team's V/TO",
+      "description": "Get a Team's Vision/Traction Organizer alongside the leadership team's: Core Values, Core Focus, 1-Year Plan, and 3-Year Picture. Unshared leadership sections come back empty.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_accountability_chart",
+      "title": "Get the Accountability Chart",
+      "description": "Get the company's Accountability Chart: every Seat, its responsibilities, and who sits in it, ordered top-down. Use it to answer who owns an area of the business.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "seatIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scope the chart to these Seats plus their ancestor chains"
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_headlines",
+      "title": "List a Team's Headlines",
+      "description": "List the Headlines on one Team's list — the short good/bad-news notes raised in Meetings. Already discussed Headlines are left out unless includeDiscussed is true. Set isCascadedMessage to list Cascading Messages instead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "isCascadedMessage": {
+            "type": "boolean",
+            "description": "Return Cascading Messages instead of Headlines"
+          },
+          "includeDiscussed": {
+            "type": "boolean",
+            "description": "Also return already-discussed Headlines"
+          },
+          "archived": {
+            "type": "boolean",
+            "description": "Return archived Headlines instead of active ones"
+          },
+          "searchText": {
+            "type": "string",
+            "description": "Free-text search across title and body"
+          },
+          "pageIndex": {
+            "type": "number",
+            "description": "Page to return, counting from 0"
+          },
+          "pageSize": {
+            "type": "number",
+            "description": "Headlines per page"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_headline_create",
+      "title": "Create a Headline",
+      "description": "Create a Headline on one Team's list, exactly as one created in the app, notifying its followers.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The Headline itself, one line of plain text"
+          },
+          "teamId": {
+            "type": "string",
+            "description": "Team Id (24-char hex). List teams with ninety_teams."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional HTML body"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User the Headline is about; defaults to the authenticated user"
+          },
+          "isCascadedMessage": {
+            "type": "boolean",
+            "description": "Create a Cascading Message instead of a Headline"
+          }
+        },
+        "required": [
+          "title",
+          "teamId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "ninety_request",
+      "title": "Raw Ninety API request",
+      "description": "Call any Ninety public API endpoint directly — the escape hatch for endpoints not covered by the typed tools or added to the API after this connector was built. The path is relative to https://api.public.ninety.io and should start with /v1/. GET /v1/swagger.json returns the live OpenAPI spec if you need to discover new endpoints. Requests are authenticated with the configured Personal Access Token and retried automatically on 429 rate limits.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "description": "Endpoint path, e.g. \"/v1/todos/query\""
+          },
+          "query": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "URL query parameters"
+          },
+          "body": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "JSON request body"
+          }
+        },
+        "required": [
+          "method",
+          "path"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    }
+  ]
+}

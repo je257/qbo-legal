@@ -1,0 +1,2094 @@
+[
+  {
+    "tool": "ninety_auth_status",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"connected\": true,\n  \"tokenSource\": \"env\",\n  \"apiBaseUrl\": \"http://stub\",\n  \"teams\": {\n    \"ok\": true\n  }\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/teams",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_auth_status",
+    "mode": "all",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"connected\": true,\n  \"tokenSource\": \"env\",\n  \"apiBaseUrl\": \"http://stub\",\n  \"teams\": {\n    \"ok\": true\n  }\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/teams",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_teams",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/teams",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_teams",
+    "mode": "all",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/teams",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_teams_available",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/teams/available",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_teams_available",
+    "mode": "all",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/teams/available",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_users",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/users",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_users",
+    "mode": "all",
+    "arguments": {
+      "email": "someone@example.com",
+      "includeInactive": true
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/users?email=someone%40example.com&includeInactive=true",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_team_users",
+    "mode": "required",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/users/team/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_team_users",
+    "mode": "all",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567",
+      "includeInactive": true
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/users/team/0123456789abcdef01234567?includeInactive=true",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_user_get",
+    "mode": "required",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/users/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_user_get",
+    "mode": "all",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/users/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todos_query",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/todos/query",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todos_query",
+    "mode": "all",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567",
+      "isPersonal": true,
+      "completed": true,
+      "archived": true,
+      "searchText": "sample searchText",
+      "title": "sample title",
+      "userIds": [
+        "0123456789abcdef01234567"
+      ],
+      "dueDateFrom": "2026-07-01",
+      "dueDateTo": "2026-07-01",
+      "sort": "sample sort",
+      "order": "asc",
+      "page": 1,
+      "pageSize": 1,
+      "paged": true
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/todos/query/paged",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"teamId\":\"0123456789abcdef01234567\",\"isPersonal\":true,\"completed\":true,\"archived\":true,\"searchText\":\"sample searchText\",\"title\":\"sample title\",\"userIds\":[\"0123456789abcdef01234567\"],\"dueDateFrom\":\"2026-07-01\",\"dueDateTo\":\"2026-07-01\",\"sort\":\"sample sort\",\"order\":\"asc\",\"page\":1,\"pageSize\":1}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_get",
+    "mode": "required",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/todos/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_get",
+    "mode": "all",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/todos/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_create",
+    "mode": "required",
+    "arguments": {
+      "title": "sample title"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/todos",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"title\":\"sample title\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_create",
+    "mode": "all",
+    "arguments": {
+      "title": "sample title",
+      "description": "sample description",
+      "dueDate": "2026-07-01",
+      "teamId": "0123456789abcdef01234567",
+      "repeat": "sample repeat",
+      "userId": "0123456789abcdef01234567",
+      "linkedItemId": "0123456789abcdef01234567",
+      "linkedItemType": "rock"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/todos",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"title\":\"sample title\",\"description\":\"sample description\",\"dueDate\":\"2026-07-01\",\"teamId\":\"0123456789abcdef01234567\",\"repeat\":\"sample repeat\",\"userId\":\"0123456789abcdef01234567\",\"linkedItemId\":\"0123456789abcdef01234567\",\"linkedItemType\":\"rock\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_update",
+    "mode": "required",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "PATCH",
+        "url": "/v1/todos/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_update",
+    "mode": "all",
+    "arguments": {
+      "id": "0123456789abcdef01234567",
+      "title": "sample title",
+      "description": "sample description",
+      "dueDate": "2026-07-01",
+      "teamId": "0123456789abcdef01234567",
+      "completed": true,
+      "archived": true,
+      "repeat": "sample repeat",
+      "userId": "0123456789abcdef01234567",
+      "linkedItemId": "0123456789abcdef01234567",
+      "linkedItemType": "rock"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "PATCH",
+        "url": "/v1/todos/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"title\":\"sample title\",\"description\":\"sample description\",\"dueDate\":\"2026-07-01\",\"teamId\":\"0123456789abcdef01234567\",\"completed\":true,\"archived\":true,\"repeat\":\"sample repeat\",\"userId\":\"0123456789abcdef01234567\",\"linkedItemId\":\"0123456789abcdef01234567\",\"linkedItemType\":\"rock\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_delete",
+    "mode": "required",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/todos/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_delete",
+    "mode": "all",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/todos/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todos_company",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/todos/company",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todos_company",
+    "mode": "all",
+    "arguments": {
+      "limit": 1,
+      "nextToken": "0123456789abcdef01234567",
+      "completed": true,
+      "archived": true,
+      "deleted": true,
+      "searchText": "sample searchText",
+      "title": "sample title",
+      "sortBy": "createdDate",
+      "sortOrder": "asc"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/todos/company?limit=1&nextToken=0123456789abcdef01234567&completed=true&archived=true&deleted=true&searchText=sample+searchText&title=sample+title&sortBy=createdDate&sortOrder=asc",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_comment",
+    "mode": "required",
+    "arguments": {
+      "id": "0123456789abcdef01234567",
+      "text": "sample text"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/todos/0123456789abcdef01234567/comments",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"text\":\"sample text\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_comment",
+    "mode": "all",
+    "arguments": {
+      "id": "0123456789abcdef01234567",
+      "text": "sample text"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/todos/0123456789abcdef01234567/comments",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"text\":\"sample text\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_link",
+    "mode": "required",
+    "arguments": {
+      "todoId": "0123456789abcdef01234567",
+      "linkedItemId": "0123456789abcdef01234567",
+      "linkedItemType": "rock"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/todos/0123456789abcdef01234567/links",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"linkedItemId\":\"0123456789abcdef01234567\",\"linkedItemType\":\"rock\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_link",
+    "mode": "all",
+    "arguments": {
+      "todoId": "0123456789abcdef01234567",
+      "linkedItemId": "0123456789abcdef01234567",
+      "linkedItemType": "rock"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/todos/0123456789abcdef01234567/links",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"linkedItemId\":\"0123456789abcdef01234567\",\"linkedItemType\":\"rock\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_unlink",
+    "mode": "required",
+    "arguments": {
+      "todoId": "0123456789abcdef01234567",
+      "linkedItemId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/todos/0123456789abcdef01234567/links/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_todo_unlink",
+    "mode": "all",
+    "arguments": {
+      "todoId": "0123456789abcdef01234567",
+      "linkedItemId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/todos/0123456789abcdef01234567/links/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issues_query",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/issues/query",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issues_query",
+    "mode": "all",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567",
+      "intervalCode": "SHORT_TERM",
+      "searchText": "sample searchText",
+      "sortField": "sample sortField",
+      "sortDirection": "ASC",
+      "pageIndex": 1,
+      "pageSize": 1
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/issues/query",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"teamId\":\"0123456789abcdef01234567\",\"intervalCode\":\"SHORT_TERM\",\"searchText\":\"sample searchText\",\"sortField\":\"sample sortField\",\"sortDirection\":\"ASC\",\"pageIndex\":1,\"pageSize\":1}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issue_get",
+    "mode": "required",
+    "arguments": {
+      "issueId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/issues/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issue_get",
+    "mode": "all",
+    "arguments": {
+      "issueId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/issues/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issue_create",
+    "mode": "required",
+    "arguments": {
+      "title": "sample title",
+      "teamId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/issues",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"title\":\"sample title\",\"teamId\":\"0123456789abcdef01234567\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issue_create",
+    "mode": "all",
+    "arguments": {
+      "title": "sample title",
+      "teamId": "0123456789abcdef01234567",
+      "interval": "SHORT_TERM",
+      "description": "sample description",
+      "priority": 1,
+      "userId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/issues",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"title\":\"sample title\",\"teamId\":\"0123456789abcdef01234567\",\"interval\":\"SHORT_TERM\",\"description\":\"sample description\",\"priority\":1,\"userId\":\"0123456789abcdef01234567\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issue_update",
+    "mode": "required",
+    "arguments": {
+      "issueId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "PATCH",
+        "url": "/v1/issues/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issue_update",
+    "mode": "all",
+    "arguments": {
+      "issueId": "0123456789abcdef01234567",
+      "title": "sample title",
+      "teamId": "0123456789abcdef01234567",
+      "interval": "SHORT_TERM",
+      "description": "sample description",
+      "priority": 1,
+      "completed": true
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "PATCH",
+        "url": "/v1/issues/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"title\":\"sample title\",\"teamId\":\"0123456789abcdef01234567\",\"interval\":\"SHORT_TERM\",\"description\":\"sample description\",\"priority\":1,\"completed\":true}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issue_delete",
+    "mode": "required",
+    "arguments": {
+      "issueId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/issues/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issue_delete",
+    "mode": "all",
+    "arguments": {
+      "issueId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/issues/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issues_company",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/issues/company",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issues_company",
+    "mode": "all",
+    "arguments": {
+      "limit": 1,
+      "nextToken": "0123456789abcdef01234567",
+      "completed": true,
+      "archived": true,
+      "deleted": true,
+      "searchText": "sample searchText",
+      "title": "sample title",
+      "sortBy": "createdDate",
+      "sortOrder": "asc"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/issues/company?limit=1&nextToken=0123456789abcdef01234567&completed=true&archived=true&deleted=true&searchText=sample+searchText&title=sample+title&sortBy=createdDate&sortOrder=asc",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issue_comment",
+    "mode": "required",
+    "arguments": {
+      "issueId": "0123456789abcdef01234567",
+      "text": "sample text"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/issues/0123456789abcdef01234567/comments",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"text\":\"sample text\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_issue_comment",
+    "mode": "all",
+    "arguments": {
+      "issueId": "0123456789abcdef01234567",
+      "text": "sample text"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/issues/0123456789abcdef01234567/comments",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"text\":\"sample text\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rocks_query",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/rocks/query",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"sortField\":\"dueDate\",\"sortDirection\":\"DESC\",\"pageSize\":50,\"pageIndex\":0}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rocks_query",
+    "mode": "all",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567",
+      "userId": "0123456789abcdef01234567",
+      "userIds": "0123456789abcdef01234567",
+      "statusCode": "OFF_TRACK",
+      "levelCode": "USER",
+      "futureScope": "Current",
+      "archived": true,
+      "searchText": "sample searchText",
+      "includeRockGoals": true,
+      "sortField": "title",
+      "sortDirection": "ASC",
+      "pageIndex": 1,
+      "pageSize": 1,
+      "paged": true
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/rocks/query/paged",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"sortField\":\"title\",\"sortDirection\":\"ASC\",\"pageSize\":1,\"pageIndex\":1,\"teamId\":\"0123456789abcdef01234567\",\"userId\":\"0123456789abcdef01234567\",\"userIds\":\"0123456789abcdef01234567\",\"statusCode\":\"OFF_TRACK\",\"levelCode\":\"USER\",\"futureScope\":\"Current\",\"archived\":true,\"searchText\":\"sample searchText\",\"includeRockGoals\":true}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rock_get",
+    "mode": "required",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/rocks/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rock_get",
+    "mode": "all",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/rocks/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rock_create",
+    "mode": "required",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567",
+      "title": "sample title",
+      "dueDate": "2026-07-01"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/rocks",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"rock\":{\"statusCode\":\"ON_TRACK\",\"levelCode\":\"USER\",\"quarter\":\"None\",\"teamId\":\"0123456789abcdef01234567\",\"title\":\"sample title\",\"dueDate\":\"2026-07-01\"}}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rock_create",
+    "mode": "all",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567",
+      "title": "sample title",
+      "dueDate": "2026-07-01",
+      "statusCode": "OFF_TRACK",
+      "levelCode": "USER",
+      "quarter": "Q1",
+      "description": "sample description",
+      "futureScope": "Current",
+      "additionalTeamIds": [
+        "0123456789abcdef01234567"
+      ],
+      "rockQuarterYearDueDate": "2026-07-01",
+      "addCreatorToFollowersList": true
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/rocks",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"rock\":{\"statusCode\":\"OFF_TRACK\",\"levelCode\":\"USER\",\"quarter\":\"Q1\",\"teamId\":\"0123456789abcdef01234567\",\"title\":\"sample title\",\"dueDate\":\"2026-07-01\",\"description\":\"sample description\",\"futureScope\":\"Current\",\"additionalTeamIds\":[\"0123456789abcdef01234567\"],\"rockQuarterYearDueDate\":\"2026-07-01\"},\"addCreatorToFollowersList\":true}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rock_update",
+    "mode": "required",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "PATCH",
+        "url": "/v1/rocks/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rock_update",
+    "mode": "all",
+    "arguments": {
+      "id": "0123456789abcdef01234567",
+      "userId": "0123456789abcdef01234567",
+      "teamId": "0123456789abcdef01234567",
+      "title": "sample title",
+      "description": "sample description",
+      "statusCode": "OFF_TRACK",
+      "levelCode": "USER",
+      "quarter": "Q1",
+      "dueDate": "2026-07-01",
+      "rockQuarterYearDueDate": "2026-07-01",
+      "archived": true,
+      "futureScope": "Current",
+      "additionalTeamIds": [
+        "0123456789abcdef01234567"
+      ]
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "PATCH",
+        "url": "/v1/rocks/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"userId\":\"0123456789abcdef01234567\",\"teamId\":\"0123456789abcdef01234567\",\"title\":\"sample title\",\"description\":\"sample description\",\"statusCode\":\"OFF_TRACK\",\"levelCode\":\"USER\",\"quarter\":\"Q1\",\"dueDate\":\"2026-07-01\",\"rockQuarterYearDueDate\":\"2026-07-01\",\"archived\":true,\"futureScope\":\"Current\",\"additionalTeamIds\":[\"0123456789abcdef01234567\"]}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rock_delete",
+    "mode": "required",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/rocks/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rock_delete",
+    "mode": "all",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/rocks/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rocks_company",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/rocks/company",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rocks_company",
+    "mode": "all",
+    "arguments": {
+      "limit": 1,
+      "nextToken": "0123456789abcdef01234567",
+      "completed": true,
+      "archived": true,
+      "deleted": true,
+      "searchText": "sample searchText",
+      "title": "sample title",
+      "sortBy": "createdDate",
+      "sortOrder": "asc"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/rocks/company?limit=1&nextToken=0123456789abcdef01234567&completed=true&archived=true&deleted=true&searchText=sample+searchText&title=sample+title&sortBy=createdDate&sortOrder=asc",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rock_milestones",
+    "mode": "required",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/rocks/0123456789abcdef01234567/milestones",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_rock_milestones",
+    "mode": "all",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/rocks/0123456789abcdef01234567/milestones",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_milestone_get",
+    "mode": "required",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/milestones/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_milestone_get",
+    "mode": "all",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/milestones/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_milestone_create",
+    "mode": "required",
+    "arguments": {
+      "rockId": "0123456789abcdef01234567",
+      "title": "sample title",
+      "dueDate": "2026-07-01",
+      "teamId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/milestones",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"rockId\":\"0123456789abcdef01234567\",\"title\":\"sample title\",\"dueDate\":\"2026-07-01\",\"teamId\":\"0123456789abcdef01234567\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_milestone_create",
+    "mode": "all",
+    "arguments": {
+      "rockId": "0123456789abcdef01234567",
+      "title": "sample title",
+      "dueDate": "2026-07-01",
+      "teamId": "0123456789abcdef01234567",
+      "description": "sample description",
+      "userOrdinal": 1,
+      "toDoId": "0123456789abcdef01234567",
+      "isDone": true,
+      "completedDate": "2026-07-01"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/milestones",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"rockId\":\"0123456789abcdef01234567\",\"title\":\"sample title\",\"dueDate\":\"2026-07-01\",\"teamId\":\"0123456789abcdef01234567\",\"description\":\"sample description\",\"userOrdinal\":1,\"toDoId\":\"0123456789abcdef01234567\",\"isDone\":true,\"completedDate\":\"2026-07-01\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_milestone_update",
+    "mode": "required",
+    "arguments": {
+      "id": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "PATCH",
+        "url": "/v1/milestones/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_milestone_update",
+    "mode": "all",
+    "arguments": {
+      "id": "0123456789abcdef01234567",
+      "title": "sample title",
+      "description": "sample description",
+      "dueDate": "2026-07-01",
+      "isDone": true,
+      "completedDate": "2026-07-01",
+      "ownedByUserId": "0123456789abcdef01234567",
+      "followers": [
+        "sample follower"
+      ]
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "PATCH",
+        "url": "/v1/milestones/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"title\":\"sample title\",\"description\":\"sample description\",\"dueDate\":\"2026-07-01\",\"isDone\":true,\"completedDate\":\"2026-07-01\",\"ownedByUserId\":\"0123456789abcdef01234567\",\"followers\":[\"sample follower\"]}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_kpis_query",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/scorecard/kpis/query",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_kpis_query",
+    "mode": "all",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567",
+      "searchText": "sample searchText",
+      "searchTitle": "sample searchTitle",
+      "searchOwner": "sample searchOwner",
+      "periodInterval": "weekly",
+      "userIds": [
+        "0123456789abcdef01234567"
+      ],
+      "unassignedOnly": true,
+      "excludeKpiIds": [
+        "0123456789abcdef01234567"
+      ],
+      "sortField": "id",
+      "sortDirection": "ASC",
+      "pageIndex": 1,
+      "pageSize": 1
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/scorecard/kpis/query",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"teamId\":\"0123456789abcdef01234567\",\"searchText\":\"sample searchText\",\"searchTitle\":\"sample searchTitle\",\"searchOwner\":\"sample searchOwner\",\"periodInterval\":\"weekly\",\"userIds\":[\"0123456789abcdef01234567\"],\"unassignedOnly\":true,\"excludeKpiIds\":[\"0123456789abcdef01234567\"],\"sortField\":\"id\",\"sortDirection\":\"ASC\",\"pageIndex\":1,\"pageSize\":1}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_team_scorecard",
+    "mode": "required",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/scorecard/team-scorecard?teamId=0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_team_scorecard",
+    "mode": "all",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567",
+      "periodInterval": "weekly",
+      "window": "default",
+      "date": "2026-07-01"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/scorecard/team-scorecard?teamId=0123456789abcdef01234567&periodInterval=weekly&window=default&date=2026-07-01",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_get_score",
+    "mode": "required",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "date": "2026-07-01"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/score?date=2026-07-01",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_get_score",
+    "mode": "all",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "date": "2026-07-01"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/score?date=2026-07-01",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_update_score",
+    "mode": "required",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "periodStartDate": "2026-07-01"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "PATCH",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/scores/2026-07-01",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_update_score",
+    "mode": "all",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "periodStartDate": "2026-07-01",
+      "value": 1,
+      "note": "sample note",
+      "goal": {
+        "sampleKey": "sampleValue"
+      }
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "PATCH",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/scores/2026-07-01",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"value\":1,\"note\":\"sample note\",\"goal\":{\"sampleKey\":\"sampleValue\"}}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_put_score",
+    "mode": "required",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "periodStartDate": "2026-07-01",
+      "value": 1
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/scores",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"periodStartDate\":\"2026-07-01\",\"value\":1}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_put_score",
+    "mode": "all",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "periodStartDate": "2026-07-01",
+      "value": 1
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/scores",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"periodStartDate\":\"2026-07-01\",\"value\":1}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_put_note",
+    "mode": "required",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "periodStartDate": "2026-07-01",
+      "note": "sample note"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/notes",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"periodStartDate\":\"2026-07-01\",\"note\":\"sample note\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_put_note",
+    "mode": "all",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "periodStartDate": "2026-07-01",
+      "note": "sample note"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/notes",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"periodStartDate\":\"2026-07-01\",\"note\":\"sample note\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_delete_score",
+    "mode": "required",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "periodStartDate": "2026-07-01"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/scores/2026-07-01",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_delete_score",
+    "mode": "all",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "periodStartDate": "2026-07-01"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/scores/2026-07-01",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_delete_note",
+    "mode": "required",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "periodStartDate": "2026-07-01"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/notes/2026-07-01",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_delete_note",
+    "mode": "all",
+    "arguments": {
+      "kpiId": "0123456789abcdef01234567",
+      "periodStartDate": "2026-07-01"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "DELETE",
+        "url": "/v1/scorecard/kpis/0123456789abcdef01234567/notes/2026-07-01",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_meeting_next",
+    "mode": "required",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/meetings/next?teamId=0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_meeting_next",
+    "mode": "all",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/meetings/next?teamId=0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_meetings",
+    "mode": "required",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/meetings?teamId=0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_meetings",
+    "mode": "all",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567",
+      "meetingType": "level10",
+      "pageIndex": 1,
+      "pageSize": 1
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/meetings?teamId=0123456789abcdef01234567&meetingType=level10&pageIndex=1&pageSize=1",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_meeting_get",
+    "mode": "required",
+    "arguments": {
+      "meetingId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/meetings/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_meeting_get",
+    "mode": "all",
+    "arguments": {
+      "meetingId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/meetings/0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_vto",
+    "mode": "required",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/teams/0123456789abcdef01234567/vto",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_vto",
+    "mode": "all",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/teams/0123456789abcdef01234567/vto",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_accountability_chart",
+    "mode": "required",
+    "arguments": {},
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/accountability-chart",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_accountability_chart",
+    "mode": "all",
+    "arguments": {
+      "seatIds": [
+        "0123456789abcdef01234567"
+      ]
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/accountability-chart?seatIds=0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_headlines",
+    "mode": "required",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/headlines?teamId=0123456789abcdef01234567",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_headlines",
+    "mode": "all",
+    "arguments": {
+      "teamId": "0123456789abcdef01234567",
+      "isCascadedMessage": true,
+      "includeDiscussed": true,
+      "archived": true,
+      "searchText": "sample searchText",
+      "pageIndex": 1,
+      "pageSize": 1
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/headlines?teamId=0123456789abcdef01234567&isCascadedMessage=true&includeDiscussed=true&archived=true&searchText=sample+searchText&pageIndex=1&pageSize=1",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_headline_create",
+    "mode": "required",
+    "arguments": {
+      "title": "sample title",
+      "teamId": "0123456789abcdef01234567"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/headlines",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"title\":\"sample title\",\"teamId\":\"0123456789abcdef01234567\"}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_headline_create",
+    "mode": "all",
+    "arguments": {
+      "title": "sample title",
+      "teamId": "0123456789abcdef01234567",
+      "description": "sample description",
+      "userId": "0123456789abcdef01234567",
+      "isCascadedMessage": true
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "url": "/v1/headlines",
+        "authorization": "Bearer <token>",
+        "contentType": "application/json",
+        "body": "{\"title\":\"sample title\",\"teamId\":\"0123456789abcdef01234567\",\"description\":\"sample description\",\"userId\":\"0123456789abcdef01234567\",\"isCascadedMessage\":true}"
+      }
+    ]
+  },
+  {
+    "tool": "ninety_request",
+    "mode": "required",
+    "arguments": {
+      "method": "GET",
+      "path": "/v1/teams"
+    },
+    "outcome": {
+      "isError": false,
+      "text": "{\n  \"ok\": true\n}"
+    },
+    "requests": [
+      {
+        "method": "GET",
+        "url": "/v1/teams",
+        "authorization": "Bearer <token>",
+        "contentType": null,
+        "body": ""
+      }
+    ]
+  },
+  {
+    "tool": "ninety_request",
+    "mode": "all",
+    "arguments": {
+      "method": "GET",
+      "path": "/v1/teams",
+      "query": {
+        "sampleKey": "sampleValue"
+      },
+      "body": {
+        "sampleKey": "sampleValue"
+      }
+    },
+    "outcome": {
+      "isError": true,
+      "text": "Network error calling GET /v1/teams: Request with GET/HEAD method cannot have body."
+    },
+    "requests": []
+  }
+]

@@ -1,0 +1,13 @@
+// TEST FIXTURE. Never deploy this. See worker.mjs in this folder.
+// The tests load it through wrangler's local test harness only. It has its own name so that it
+// could never replace the real connector, and the same storage binding so that the two can be
+// swapped over the same stored sign-ins.
+{
+  "name": "ninety-mcp-earlier-build-test-fixture",
+  "main": "./worker.mjs",
+  "compatibility_date": "2026-11-01",
+  "send_metrics": false,
+  "workers_dev": false,
+  "preview_urls": false,
+  "kv_namespaces": [{ "binding": "OAUTH_KV" }]
+}
