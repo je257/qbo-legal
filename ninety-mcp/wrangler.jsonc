@@ -1,0 +1,47 @@
+// The hosted (Cloudflare Worker) build of the Ninety connector. See SETUP-CLOUD.md.
+// Deploy with: npm run deploy
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ninety-mcp",
+  "main": "cloud/worker.ts",
+  "compatibility_date": "2026-11-01",
+
+  // Do not send usage statistics about this project to Cloudflare from the wrangler tool.
+  "send_metrics": false,
+
+  // Reachable at https://ninety-mcp.<your-subdomain>.workers.dev and nowhere else.
+  "workers_dev": true,
+  "preview_urls": false,
+
+  // Request logs in the Cloudflare dashboard (Worker, Logs). They hold tool names and status codes,
+  // never tokens, passwords, arguments or results.
+  "observability": { "enabled": true },
+
+  // Sign-in storage. Created automatically on the first deploy.
+  "kv_namespaces": [{ "binding": "OAUTH_KV" }],
+
+  // Limits on sign-in attempts: 10 a minute from one address, 60 a minute overall.
+  "ratelimits": [
+    { "name": "LOGIN_LIMITER", "namespace_id": "9001", "simple": { "limit": 10, "period": 60 } },
+    { "name": "LOGIN_LIMITER_GLOBAL", "namespace_id": "9002", "simple": { "limit": 60, "period": 60 } }
+  ],
+
+  // As shipped, the hosted connector offers all 48 tools, the same as the desktop connector. Set either line to
+  // "false" (and publish again) to leave those tools out of the hosted connector.
+  "vars": {
+    // The six delete tools (To-Do, To-Do link, Issue, Rock, score, note), and clearing a score or note.
+    "ENABLE_DELETE_TOOLS": "true",
+    // ninety_request, which can call any Ninety API endpoint with any method.
+    "ENABLE_RAW_REQUEST": "true"
+
+    // Who may register an app with the connector. Left out, it is Anthropic's published address
+    // ranges, which is where Claude registers from. If Claude can no longer connect after Anthropic
+    // changes its addresses, set the new ranges here, or "*" to let anyone register:
+    // "REGISTRATION_SOURCES": "160.79.104.0/21,153.61.208.0/20"
+  }
+
+  // Two SECRETS are needed and are NOT kept in this file. Add them in the Cloudflare dashboard
+  // (Workers & Pages, ninety-mcp, Settings, Variables and Secrets, type "Secret"):
+  //   NINETY_API_TOKEN     a Ninety Personal Access Token
+  //   CONNECTOR_PASSWORD   what you type on the sign-in page, at least 16 characters
+}
