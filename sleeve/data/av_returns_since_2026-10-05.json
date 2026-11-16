@@ -1,23 +1,194 @@
 {
-  "_note": "Cumulative price returns (close-to-close) from 2026-10-05 to the latest close, fetched via Alpha Vantage ANALYTICS_FIXED_WINDOW while the YCharts connector is down. Used to roll the verified 10/5 monitor weights forward: w_new = w_old*(1+r)/sum(w*(1+r)). Free-tier quota allows ~3 batches of 5 per day; fetched_through marks the close each batch reflects. Remaining tickers to fetch are in 'pending'.",
-  "baselineClose": "2026-10-05",
-  "returns": {
-    "AAPL": {"r": 0.06831085343506871, "through": "2026-11-11"},
-    "AMAT": {"r": -0.27144648521059234, "through": "2026-11-11"},
-    "AMGN": {"r": 0.161620924115341, "through": "2026-11-11"},
-    "AMZN": {"r": 0.0587509944311857, "through": "2026-11-11"},
-    "APH": {"r": -0.09121118368282288, "through": "2026-11-11"},
-    "AXP": {"r": 0.0660682052116659, "through": "2026-11-11"},
-    "BNY": {"r": 0.06673798543043952, "through": "2026-11-11"},
-    "BR": {"r": 0.21228312798591942, "through": "2026-11-11"},
-    "BX": {"r": 0.10297745629054478, "through": "2026-11-11"},
-    "COST": {"r": 0.17938906766401996, "through": "2026-11-11"},
-    "CVX": {"r": 0.03298299995156628, "through": "2026-11-11"},
-    "DHR": {"r": 0.0637403372361105, "through": "2026-11-11"},
-    "DKS": {"r": 0.09078976154014473, "through": "2026-11-11"},
-    "ECL": {"r": 0.11112715198325285, "through": "2026-11-11"},
-    "HD": {"r": 0.2495465054241508, "through": "2026-11-11"}
+ "_note": "Cumulative price returns (close-to-close) from 2026-10-05 to the latest close, fetched via Alpha Vantage ANALYTICS_FIXED_WINDOW while the YCharts connector is down. Used to roll the verified 10/5 monitor weights forward: w_new = w_old*(1+r)/sum(w*(1+r)). Free-tier quota allows ~3 batches of 5 per day; fetched_through marks the close each batch reflects. Remaining tickers to fetch are in 'pending'.",
+ "baselineClose": "2026-10-05",
+ "returns": {
+  "AAPL": {
+   "r": 0.06831085343506871,
+   "through": "2026-11-11"
   },
-  "pending": ["IDXX","JPM","KLAC","LLY","LMT","LRCX","MS","MSFT","NEM","NFLX","NVDA","BKNG","PEP","RSG","SCHW","TROW","ULTA","UNH","UNP","WMT","XOM","YUM","KMI","META","PANW","ABBV","ZTS","GOOGL","BKR","HON","NEE","VRT","IBKR","CTVA","DDOG","OTIS","CEG"],
-  "priorityNextFetch": ["MSFT","NVDA","GOOGL","META","PANW","JPM","SCHW","DDOG","LRCX","KLAC"]
+  "AMAT": {
+   "r": -0.27144648521059234,
+   "through": "2026-11-11"
+  },
+  "AMGN": {
+   "r": 0.161620924115341,
+   "through": "2026-11-11"
+  },
+  "AMZN": {
+   "r": 0.0587509944311857,
+   "through": "2026-11-11"
+  },
+  "APH": {
+   "r": -0.09121118368282288,
+   "through": "2026-11-11"
+  },
+  "AXP": {
+   "r": 0.0660682052116659,
+   "through": "2026-11-11"
+  },
+  "BNY": {
+   "r": 0.06673798543043952,
+   "through": "2026-11-11"
+  },
+  "BR": {
+   "r": 0.21228312798591942,
+   "through": "2026-11-11"
+  },
+  "BX": {
+   "r": 0.10297745629054478,
+   "through": "2026-11-11"
+  },
+  "COST": {
+   "r": 0.17938906766401996,
+   "through": "2026-11-11"
+  },
+  "CVX": {
+   "r": 0.03298299995156628,
+   "through": "2026-11-11"
+  },
+  "DHR": {
+   "r": 0.0637403372361105,
+   "through": "2026-11-11"
+  },
+  "DKS": {
+   "r": 0.09078976154014473,
+   "through": "2026-11-11"
+  },
+  "ECL": {
+   "r": 0.11112715198325285,
+   "through": "2026-11-11"
+  },
+  "HD": {
+   "r": 0.2495465054241508,
+   "through": "2026-11-11"
+  },
+  "MSFT": {
+   "r": -0.00247534,
+   "through": "2026-11-13"
+  },
+  "PANW": {
+   "r": -0.20778838,
+   "through": "2026-11-13"
+  },
+  "GOOGL": {
+   "r": -0.14633302,
+   "through": "2026-11-13"
+  },
+  "META": {
+   "r": -0.13507211,
+   "through": "2026-11-13"
+  },
+  "NVDA": {
+   "r": -0.31833403,
+   "through": "2026-11-13"
+  },
+  "DDOG": {
+   "r": -0.3337554,
+   "through": "2026-11-13"
+  },
+  "KLAC": {
+   "r": -0.26362098,
+   "through": "2026-11-13"
+  },
+  "JPM": {
+   "r": 0.04673645,
+   "through": "2026-11-13"
+  },
+  "LRCX": {
+   "r": -0.34667438,
+   "through": "2026-11-13"
+  },
+  "SCHW": {
+   "r": -0.04757044,
+   "through": "2026-11-13"
+  },
+  "NEM": {
+   "r": -0.02313935,
+   "through": "2026-11-13"
+  },
+  "LMT": {
+   "r": 0.17647988,
+   "through": "2026-11-13"
+  },
+  "MS": {
+   "r": 0.00867355,
+   "through": "2026-11-13"
+  },
+  "LLY": {
+   "r": 0.26428546,
+   "through": "2026-11-13"
+  },
+  "IDXX": {
+   "r": 0.33612234,
+   "through": "2026-11-13"
+  },
+  "NFLX": {
+   "r": -0.07925926,
+   "through": "2026-11-13"
+  },
+  "TROW": {
+   "r": 0.0481093,
+   "through": "2026-11-13"
+  },
+  "BKNG": {
+   "r": 0.0078949,
+   "through": "2026-11-13"
+  },
+  "RSG": {
+   "r": 0.1886952,
+   "through": "2026-11-13"
+  },
+  "PEP": {
+   "r": 0.15750099,
+   "through": "2026-11-13"
+  },
+  "WMT": {
+   "r": 0.21909203,
+   "through": "2026-11-13"
+  },
+  "ULTA": {
+   "r": 0.21731279,
+   "through": "2026-11-13"
+  },
+  "XOM": {
+   "r": 0.04018293,
+   "through": "2026-11-13"
+  },
+  "UNH": {
+   "r": 0.07628507,
+   "through": "2026-11-13"
+  },
+  "UNP": {
+   "r": 0.09160471,
+   "through": "2026-11-13"
+  }
+ },
+ "pending": [
+  "YUM",
+  "KMI",
+  "ABBV",
+  "ZTS",
+  "BKR",
+  "HON",
+  "NEE",
+  "VRT",
+  "IBKR",
+  "CTVA",
+  "OTIS",
+  "CEG"
+ ],
+ "priorityNextFetch": [
+  "YUM",
+  "KMI",
+  "ABBV",
+  "ZTS",
+  "BKR",
+  "HON",
+  "NEE",
+  "VRT",
+  "IBKR",
+  "CTVA",
+  "OTIS",
+  "CEG"
+ ]
 }
